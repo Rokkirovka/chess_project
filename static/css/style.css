@@ -1,0 +1,51 @@
+.main_header{
+color: red;
+font-size: 50pt;
+text-align: center;
+}
+
+.center{
+text-align: center;
+}
+
+.chess-board{
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+}
+
+.chess-board .light {
+    background: #eee;
+    height: 50pt;
+    width: 50pt;
+    font-size: 30pt;
+}
+
+.chess-board .dark {
+    background: #aaa;
+    height: 50pt;
+    width: 50pt;
+    font-size: 30pt;
+}
+
+.chess-board .red {
+    background: #ed375b;
+    height: 50pt;
+    width: 50pt;
+    font-size: 30pt;
+}
+
+.cell{
+    height: 50pt;
+    width: 50pt;
+    font-size: 30pt;
+}
+
+button {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+}

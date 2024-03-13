@@ -1,0 +1,25 @@
+from flask_wtf import FlaskForm
+from wtforms import PasswordField, StringField, SubmitField, EmailField, BooleanField, IntegerField, SelectField
+from wtforms.validators import DataRequired
+
+
+class LoginForm(FlaskForm):
+    email = EmailField('Почта', validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired()])
+    remember_me = BooleanField('Запомнить меня')
+    submit = SubmitField('Войти')
+
+
+class RegisterForm(FlaskForm):
+    email = EmailField('Login / email', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password_again = PasswordField('Repeat password', validators=[DataRequired()])
+    nick = StringField('Nick', validators=[DataRequired()])
+    submit = SubmitField('Зарегистрироваться')
+
+
+class GameForm(FlaskForm):
+    opponent = StringField('Введите ник вашего соперника', validators=[DataRequired()])
+    color = SelectField('Выберите свой цвет', validators=[DataRequired()],
+                        choices=[('1', 'белые'), ('2', 'черные'), ('3', 'случайно')])
+    submit = SubmitField('Начать игру')

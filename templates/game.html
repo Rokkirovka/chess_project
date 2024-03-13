@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if current_user.id == white or current_user == black.id %}
+<form method="post">
+<table class="chess-board">
+    <tbody>
+        {% for row in range(7, -1, -1) %}
+            <tr>
+                {% for col in range(8) %}
+                    {% set cell = board[row * 8 + col] %}
+                    <td class="{{ cell['color'] }}">
+                        {% if turn and white == current_user.id or not turn and black == current_user.id %}
+                        <button
+                                name="{{ cell['name'] }}"
+                                class="cell">
+                            {{ cell['piece'] }}
+                        </button>
+                        {% else %}
+                        {{ cell['piece'] }}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</form>
+{% else %}
+<p>У вас нет доступа к партии</p>
+{% endif %}
+
+{% endblock %}
