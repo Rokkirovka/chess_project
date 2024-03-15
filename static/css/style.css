@@ -4,6 +4,10 @@ font-size: 50pt;
 text-align: center;
 }
 
+table {
+    table-layout: fixed;
+}
+
 .center{
 text-align: center;
 }
@@ -16,29 +20,29 @@ text-align: center;
 
 .chess-board .light {
     background: #eee;
-    height: 50pt;
-    width: 50pt;
-    font-size: 30pt;
+    height: 70pt;
+    width: 70pt;
+    font-size: 40pt;
 }
 
 .chess-board .dark {
     background: #aaa;
-    height: 50pt;
-    width: 50pt;
-    font-size: 30pt;
+    height: 70pt;
+    width: 70pt;
+    font-size: 40pt;
 }
 
 .chess-board .red {
     background: #ed375b;
-    height: 50pt;
-    width: 50pt;
-    font-size: 30pt;
+    height: 70pt;
+    width: 70pt;
+    font-size: 40pt;
 }
 
 .cell{
-    height: 50pt;
-    width: 50pt;
-    font-size: 30pt;
+    height: 70pt;
+    width: 70pt;
+    font-size: 40pt;
 }
 
 button {
@@ -48,4 +52,6 @@ button {
     cursor: pointer;
     overflow: hidden;
     outline: none;
+    height: 50pt;
+    width: 50pt;
 }

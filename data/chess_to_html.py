@@ -1,3 +1,4 @@
+import chess
 from chess import Board, square_name, square_file, square_rank, Piece, Move, parse_square
 
 
@@ -50,3 +51,17 @@ class HTMLBoard(Board):
                     dct['color'] = 'red'
             lst.append(dct)
         return lst
+
+    def get_board_for_ajax(self):
+        dct = {'cells': {}}
+        for i in range(64):
+            if square_name(i) == self.current:
+                color = 'red'
+            elif self.current and self.is_legal(Move.from_uci(self.current + square_name(i))):
+                color = 'red'
+            elif (square_file(i) + square_rank(i)) % 2:
+                color = 'light'
+            else:
+                color = 'dark'
+            dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
+        return dct

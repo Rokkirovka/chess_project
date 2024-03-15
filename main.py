@@ -1,13 +1,13 @@
 from random import choice
 
-from flask import Flask, render_template, request, redirect
-from flask_login import LoginManager, login_user, login_required, current_user
+from flask import Flask, render_template, request, redirect, jsonify
+from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 
 from data import db_session
 from data.chess_to_html import HTMLBoard
 from data.games import Game
 from data.users import User
-from forms.user import RegisterForm, GameForm
+from forms.user import RegisterForm, GameForm, LoginForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -17,7 +17,7 @@ login_manager.init_app(app)
 
 def main():
     db_session.global_init('db/chess.db')
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
 
 
 @app.route('/')
@@ -46,7 +46,7 @@ def new_game():
         else:
             game.black_player = current_user.id
             game.white_player = opponent.id
-        game.position = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/QNBQKBNR'
+        game.position = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
         game.turn = True
         game.is_finished = False
         db_sess.add(game)
@@ -55,7 +55,7 @@ def new_game():
     return render_template('create_game.html', form=form)
 
 
-@app.route('/play_game/<game_id>', methods=['POST', 'GET'])
+@app.route('/play_game/<game_id>')
 @login_required
 def play_game(game_id):
     db_sess = db_session.create_session()
@@ -63,13 +63,15 @@ def play_game(game_id):
     board = HTMLBoard(game.position)
     board.current = game.cell
     board.turn = game.turn
-    if request.method == 'POST':
-        cell = list(request.form.keys())[0]
+    if request.is_json:
+        cell = request.args.get('cell')
         board.add_cell(cell)
         game.cell = board.current
         game.position = board.board_fen()
         game.turn = board.turn
         db_sess.commit()
+        dct = board.get_board_for_ajax()
+        return jsonify(dct)
     lst = board.get_board()
     return render_template('game.html', board=lst, white=game.white_player,
                            black=game.black_player, turn=game.turn)
@@ -98,15 +100,45 @@ def register():
         user.rating = 1500
         db_sess.add(user)
         db_sess.commit()
-        login_user(user)
+        login_user(user, remember=True)
         return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            return redirect("/")
+        return render_template('login.html',
+                               message="Неправильный логин или пароль",
+                               form=form)
+    return render_template('login.html', title='Авторизация', form=form)
 
 
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
+@app.route('/ajax', methods=['POST'])
+def ajax():
+    data = request.json
+    # Обработка данных
+    response_data = {'message': 'Привет, ' + data['name']}
+    return jsonify(response_data)
 
 
 if __name__ == '__main__':
