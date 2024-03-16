@@ -2,6 +2,7 @@ from random import choice
 
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
+from flask_socketio import SocketIO
 
 from data import db_session
 from data.chess_to_html import HTMLBoard
@@ -13,6 +14,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+socketio = SocketIO(app)
 
 
 def main():
@@ -131,14 +133,6 @@ def load_user(user_id):
 def logout():
     logout_user()
     return redirect("/")
-
-
-@app.route('/ajax', methods=['POST'])
-def ajax():
-    data = request.json
-    # Обработка данных
-    response_data = {'message': 'Привет, ' + data['name']}
-    return jsonify(response_data)
 
 
 if __name__ == '__main__':

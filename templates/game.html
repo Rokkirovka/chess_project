@@ -1,19 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if current_user.id == white %}
+{% set board = board[::-1] %}
+{% endif %}
 {% if current_user.id == white or current_user.id == black %}
 <table class="chess-board">
     <tbody>
-        {% for row in range(7, -1, -1) %}
+        {% for row in range(8) %}
             <tr>
                 {% for col in range(8) %}
                     {% set cell = board[row * 8 + col] %}
-                    <td class="{{ cell['color'] }}">
+                    <td class="cell">
+                        {% if current_user.id == white and turn or current_user.id == black and not turn %}
                         <button
                                 name="{{ cell['name'] }}"
-                                class="cell">
-                            {{ cell['piece'] }}
+                                class="cell-button"
+                                style="background-color: {{ cell['color'] }};">
+                            <span class="cell-piece">{{ cell['piece'] }}</span>
                         </button>
+                        {% else %}
+                        <button
+                                name="{{ cell['name'] }}"
+                                class="cell-button-hollow"
+                                style="background-color: {{ cell['color'] }};">
+                            <span class="cell-piece">{{ cell['piece'] }}</span>
+                        </button>
+                        {% endif %}
                     </td>
                 {% endfor %}
             </tr>

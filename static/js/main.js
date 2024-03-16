@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    $('.cell').click(function(){
+    $('.chess-board .cell-button').click(function(){
         $.ajax({
             url: '',
             type: 'get',
@@ -9,8 +9,8 @@ $(document).ready(function(){
             },
             success: function(response){
                 for (var cell in response.cells){
-                    $('[name=' + cell + ']').text(response.cells[cell]['piece']);
-                    $('[name=' + cell + ']').removeClass().addClass(response.cells[cell]['color']);
+                    $('.chess-board [name=' + cell + '] .cell-piece').text(response.cells[cell]['piece']);
+                    $('.chess-board [name=' + cell + ']').css('background-color', response.cells[cell]['color']);
                 }
             }
         })

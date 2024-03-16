@@ -18,30 +18,25 @@ text-align: center;
     border-collapse: collapse;
 }
 
-.chess-board .light {
-    background: #eee;
+.chess-board .cell {
     height: 70pt;
     width: 70pt;
-    font-size: 40pt;
+    box-sizing: border-box;
 }
 
-.chess-board .dark {
-    background: #aaa;
-    height: 70pt;
-    width: 70pt;
-    font-size: 40pt;
+.chess-board .cell-button{
+    height: 100%;
+    width: 100%;
 }
 
-.chess-board .red {
-    background: #ed375b;
-    height: 70pt;
-    width: 70pt;
-    font-size: 40pt;
+.chess-board .cell-button-hollow{
+    height: 100%;
+    width: 100%;
 }
 
-.cell{
-    height: 70pt;
-    width: 70pt;
+.chess-board .cell-piece{
+    height: 100%;
+    width: 100%;
     font-size: 40pt;
 }
 
@@ -52,6 +47,4 @@ button {
     cursor: pointer;
     overflow: hidden;
     outline: none;
-    height: 50pt;
-    width: 50pt;
 }

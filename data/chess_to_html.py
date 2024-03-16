@@ -17,6 +17,12 @@ pieces = {Piece.from_symbol('r'): '♜',
           None: ''}
 
 
+colors = {'light': '#eee',
+          'dark': '#aaa',
+          'light-red': '#ff4c5b',
+          'dark-red': '#8b0000'}
+
+
 class HTMLBoard(Board):
     current = None
 
@@ -42,13 +48,13 @@ class HTMLBoard(Board):
             dct = {
                 'name': square_name(i),
                 'piece': pieces[self.piece_at(i)],
-                'color': 'light' if (square_file(i) + square_rank(i)) % 2 else 'dark'
+                'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
             }
             if self.current is not None:
                 if dct['name'] == self.current:
-                    dct['color'] = 'red'
+                    dct['color'] = colors['dark-red']
                 elif self.is_legal(Move.from_uci(self.current + dct['name'])):
-                    dct['color'] = 'red'
+                    dct['color'] = colors['light-red']
             lst.append(dct)
         return lst
 
@@ -56,12 +62,12 @@ class HTMLBoard(Board):
         dct = {'cells': {}}
         for i in range(64):
             if square_name(i) == self.current:
-                color = 'red'
+                color = colors['dark-red']
             elif self.current and self.is_legal(Move.from_uci(self.current + square_name(i))):
-                color = 'red'
+                color = colors['light-red']
             elif (square_file(i) + square_rank(i)) % 2:
-                color = 'light'
+                color = colors['light']
             else:
-                color = 'dark'
+                color = colors['dark']
             dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
         return dct
