@@ -1,3 +1,4 @@
+const socket = io();
 $(document).ready(function(){
     $('.chess-board .cell-button').click(function(){
         $.ajax({
@@ -15,4 +16,10 @@ $(document).ready(function(){
             }
         })
     })
-})
+});
+socket.on('update_board', (response) => {
+    for (var cell in response.cells){
+        $('.chess-board [name=' + cell + '] .cell-piece').text(response.cells[cell]['piece']);
+        $('.chess-board [name=' + cell + ']').css('background-color', response.cells[cell]['color']);
+    }
+});

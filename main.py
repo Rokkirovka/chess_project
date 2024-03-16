@@ -73,6 +73,8 @@ def play_game(game_id):
         game.turn = board.turn
         db_sess.commit()
         dct = board.get_board_for_ajax()
+        dct_for_socket = board.get_board_for_socket()
+        socketio.emit('update_board', dct_for_socket)
         return jsonify(dct)
     lst = board.get_board()
     return render_template('game.html', board=lst, white=game.white_player,

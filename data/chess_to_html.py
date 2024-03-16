@@ -71,3 +71,13 @@ class HTMLBoard(Board):
                 color = colors['dark']
             dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
         return dct
+
+    def get_board_for_socket(self):
+        dct = {'cells': {}}
+        for i in range(64):
+            if (square_file(i) + square_rank(i)) % 2:
+                color = colors['light']
+            else:
+                color = colors['dark']
+            dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
+        return dct
