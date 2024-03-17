@@ -21,5 +21,5 @@ class RegisterForm(FlaskForm):
 class GameForm(FlaskForm):
     opponent = StringField('Введите ник вашего соперника', validators=[DataRequired()])
     color = SelectField('Выберите свой цвет', validators=[DataRequired()],
-                        choices=[('1', 'белые'), ('2', 'черные'), ('3', 'случайно')])
+                        choices=[('3', 'случайно'), ('1', 'белые'), ('2', 'черные')])
     submit = SubmitField('Начать игру')

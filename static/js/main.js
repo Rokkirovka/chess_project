@@ -18,6 +18,9 @@ $(document).ready(function(){
     })
 });
 socket.on('update_board', (response) => {
+    if (response.end_game == true){
+        $('.end').text(response.result + ' • ' + response.reason)
+    }
     for (var cell in response.cells){
         $('.chess-board [name=' + cell + '] .cell-piece').text(response.cells[cell]['piece']);
         $('.chess-board [name=' + cell + ']').css('background-color', response.cells[cell]['color']);

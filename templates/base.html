@@ -11,9 +11,9 @@
 <body>
 <nav>
     {% if current_user.is_authenticated %}
-        <a class="navbar-brand" href="/logout">{{ current_user.nick }}</a>
+        <a class="user" href="/logout">{{ current_user.nick }}</a>
     {% else %}
-        <p>Гость</p>
+        <p class="user">Гость</p>
     {% endif %}
     <header>
         <a href="/" class="main_header">Chess</a>

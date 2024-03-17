@@ -1,3 +1,7 @@
+html{
+    background-color: #e5eaf5;
+}
+
 .main_header{
     color: black;
     font-size: 50pt;
@@ -5,9 +9,9 @@
     display:block;
     text-decoration: none;
 }
-
-table {
+.chess-board{
     table-layout: fixed;
+    background-color: white;
 }
 
 .center{
@@ -56,4 +60,14 @@ button {
     cursor: pointer;
     overflow: hidden;
     outline: none;
+}
+
+.user{
+    font-size: 30px;
+    text-decoration: none;
+    color: black;
+}
+
+.end{
+    font-size: 40px;
 }

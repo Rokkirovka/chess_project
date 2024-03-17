@@ -1,9 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 {% if role == 'black' %}
-{% set board = board[::-1] %}
+    {% set board = board[::-1] %}
 {% endif %}
+
+{% if end_game %}
+    <div class="end">{{ result }} • {{ reason }}</div>
+{% else %}
+    <div class="end"></div>
+{% endif %}
+
+<div class="user">Белые: <a href="/" class="user">{{ white_player.nick }}</a> {{ white_player.rating }}</div> <br>
 <table class="chess-board">
     <tbody>
         {% for row in range(7, -1, -1) %}
@@ -14,8 +23,9 @@
                     {% set piece = cell['piece'] %}
                     {% set name = cell['name'] %}
                     <td class="cell">
-                        {% if role == 'spectator' %}
+                        {% if role == 'spectator' or end_game %}
                         <button
+                                name="{{ name }}"
                                 class="cell-button-hollow"
                                 style="background-color: {{ color }};">
                             <span class="cell-piece">{{ piece }}</span>
@@ -34,5 +44,7 @@
         {% endfor %}
     </tbody>
 </table>
+<br>
+<div class="user">Черные: <a href="/" class="user">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
 
 {% endblock %}

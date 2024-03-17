@@ -12,4 +12,6 @@ class Game(SqlAlchemyBase, SerializerMixin):
     moves = sqlalchemy.Column(sqlalchemy.String)
     position = sqlalchemy.Column(sqlalchemy.String)
     turn = sqlalchemy.Column(sqlalchemy.Boolean)
+    result = sqlalchemy.Column(sqlalchemy.String)
+    reason = sqlalchemy.Column(sqlalchemy.String)
     is_finished = sqlalchemy.Column(sqlalchemy.Boolean)

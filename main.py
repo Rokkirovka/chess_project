@@ -38,8 +38,8 @@ def new_game():
         if not opponent:
             return render_template('create_game.html', form=form, message="Такого игрока нет")
         game = Game()
-        if form.color.data == 'случайно':
-            color = choice(['белые', 'черные'])
+        if form.color.data == '3':
+            color = choice(['1', '2'])
         else:
             color = form.color.data
         if color == '1':
@@ -53,18 +53,23 @@ def new_game():
         game.is_finished = False
         db_sess.add(game)
         db_sess.commit()
-        return redirect('/play_game/' + str(game.id))
+        return redirect('/game/' + str(game.id))
     return render_template('create_game.html', form=form)
 
 
-@app.route('/play_game/<game_id>')
+@app.route('/game/<game_id>')
 def play_game(game_id):
     db_sess = db_session.create_session()
     game = db_sess.query(Game).filter(Game.id == game_id).first()
+    white_player = db_sess.query(User).filter(User.id == game.white_player).first()
+    black_player = db_sess.query(User).filter(User.id == game.black_player).first()
     board = HTMLBoard(game.position)
     board.current = game.cell
     board.turn = game.turn
     if request.is_json:
+        if game.is_finished:
+            dct = board.get_board_for_ajax()
+            return jsonify(dct)
         if (current_user.id == game.white_player and board.turn
                 or current_user.id == game.black_player and not board.turn):
             cell = request.args.get('cell')
@@ -72,8 +77,22 @@ def play_game(game_id):
             game.cell = board.current
             game.position = board.board_fen()
             game.turn = board.turn
+            if board.is_checkmate():
+                game.reason = 'Checkmate'
+                game.is_finished = 1
+                if board.turn:
+                    game.result = 'Black win'
+                else:
+                    game.result = 'White win'
+            if board.is_stalemate():
+                game.is_finished = 1
+                game.result = 'Draw'
+                game.reason = 'Stalemate'
             db_sess.commit()
             dct_for_socket = board.get_board_for_socket()
+            dct_for_socket['result'] = game.result
+            dct_for_socket['reason'] = game.reason
+            dct_for_socket['end_game'] = game.is_finished
             socketio.emit('update_board', dct_for_socket)
         dct = board.get_board_for_ajax()
         return jsonify(dct)
@@ -87,7 +106,9 @@ def play_game(game_id):
             role = 'spectator'
     else:
         role = 'spectator'
-    return render_template('game.html', board=lst, role=role)
+    return render_template('game.html', board=lst, role=role,
+                           white_player=white_player, black_player=black_player, end_game=game.is_finished,
+                           result=game.result, reason=game.reason)
 
 
 @app.route('/register', methods=['GET', 'POST'])
