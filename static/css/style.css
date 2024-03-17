@@ -1,7 +1,9 @@
 .main_header{
-color: red;
-font-size: 50pt;
-text-align: center;
+    color: black;
+    font-size: 50pt;
+    text-align: center;
+    display:block;
+    text-decoration: none;
 }
 
 table {
@@ -38,6 +40,13 @@ text-align: center;
     height: 100%;
     width: 100%;
     font-size: 40pt;
+}
+
+.home{
+    text-decoration: none;
+    font-family: 'Arial';
+    font-size: 40px;
+    color: black;
 }
 
 button {

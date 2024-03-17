@@ -59,7 +59,7 @@ class HTMLBoard(Board):
         return lst
 
     def get_board_for_ajax(self):
-        dct = {'cells': {}}
+        dct = {'cells': {}, 'turn': self.turn}
         for i in range(64):
             if square_name(i) == self.current:
                 color = colors['dark-red']

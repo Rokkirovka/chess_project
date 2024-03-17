@@ -58,7 +58,6 @@ def new_game():
 
 
 @app.route('/play_game/<game_id>')
-@login_required
 def play_game(game_id):
     db_sess = db_session.create_session()
     game = db_sess.query(Game).filter(Game.id == game_id).first()
@@ -66,19 +65,29 @@ def play_game(game_id):
     board.current = game.cell
     board.turn = game.turn
     if request.is_json:
-        cell = request.args.get('cell')
-        board.add_cell(cell)
-        game.cell = board.current
-        game.position = board.board_fen()
-        game.turn = board.turn
-        db_sess.commit()
+        if (current_user.id == game.white_player and board.turn
+                or current_user.id == game.black_player and not board.turn):
+            cell = request.args.get('cell')
+            board.add_cell(cell)
+            game.cell = board.current
+            game.position = board.board_fen()
+            game.turn = board.turn
+            db_sess.commit()
+            dct_for_socket = board.get_board_for_socket()
+            socketio.emit('update_board', dct_for_socket)
         dct = board.get_board_for_ajax()
-        dct_for_socket = board.get_board_for_socket()
-        socketio.emit('update_board', dct_for_socket)
         return jsonify(dct)
     lst = board.get_board()
-    return render_template('game.html', board=lst, white=game.white_player,
-                           black=game.black_player, turn=game.turn)
+    if current_user.is_authenticated:
+        if current_user.id == game.white_player:
+            role = 'white'
+        elif current_user.id == game.black_player:
+            role = 'black'
+        else:
+            role = 'spectator'
+    else:
+        role = 'spectator'
+    return render_template('game.html', board=lst, role=role)
 
 
 @app.route('/register', methods=['GET', 'POST'])
