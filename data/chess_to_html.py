@@ -1,6 +1,4 @@
-import chess
 from chess import Board, square_name, square_file, square_rank, Piece, Move, parse_square
-
 
 pieces = {Piece.from_symbol('r'): '♜',
           Piece.from_symbol('n'): '♞',
@@ -15,7 +13,6 @@ pieces = {Piece.from_symbol('r'): '♜',
           Piece.from_symbol('K'): '♔',
           Piece.from_symbol('P'): '♙',
           None: ''}
-
 
 colors = {'light': '#eee',
           'dark': '#aaa',
@@ -33,7 +30,12 @@ class HTMLBoard(Board):
         elif cell == self.current:
             self.current = None
         else:
-            move = Move.from_uci(self.current + cell)
+            if (pieces[self.piece_at(parse_square(self.current))] == '♙' and self.current[1] == '7' and cell[1] == '8'
+                    or pieces[self.piece_at(parse_square(self.current))] == '♟' and self.current[1] == '2' and cell[
+                        1] == '1'):
+                move = Move.from_uci(self.current + cell + 'q')
+            else:
+                move = Move.from_uci(self.current + cell)
             if not self.is_legal(move):
                 self.current = None
                 if self.color_at(parse_square(cell)) == self.turn:
@@ -53,7 +55,8 @@ class HTMLBoard(Board):
             if self.current is not None:
                 if dct['name'] == self.current:
                     dct['color'] = colors['dark-red']
-                elif self.is_legal(Move.from_uci(self.current + dct['name'])):
+                elif self.is_legal(Move.from_uci(self.current + dct['name'])) or self.is_legal(
+                        Move.from_uci(self.current + dct['name'] + 'q')):
                     dct['color'] = colors['light-red']
             lst.append(dct)
         return lst
@@ -63,7 +66,8 @@ class HTMLBoard(Board):
         for i in range(64):
             if square_name(i) == self.current:
                 color = colors['dark-red']
-            elif self.current and self.is_legal(Move.from_uci(self.current + square_name(i))):
+            elif self.current and (self.is_legal(Move.from_uci(self.current + square_name(i))) or self.is_legal(
+                    Move.from_uci(self.current + square_name(i) + 'q'))):
                 color = colors['light-red']
             elif (square_file(i) + square_rank(i)) % 2:
                 color = colors['light']
@@ -73,7 +77,7 @@ class HTMLBoard(Board):
         return dct
 
     def get_board_for_socket(self):
-        dct = {'cells': {}}
+        dct = {'cells': {}, 'turn': self.turn}
         for i in range(64):
             if (square_file(i) + square_rank(i)) % 2:
                 color = colors['light']

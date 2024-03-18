@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_user, login_required, current_user, 
 from flask_socketio import SocketIO
 
 from data import db_session
+from data.rating_calculator import rating_calculation
 from data.chess_to_html import HTMLBoard
 from data.games import Game
 from data.users import User
@@ -19,7 +20,7 @@ socketio = SocketIO(app)
 
 def main():
     db_session.global_init('db/chess.db')
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=80)
 
 
 @app.route('/')
@@ -69,6 +70,7 @@ def play_game(game_id):
     if request.is_json:
         if game.is_finished:
             dct = board.get_board_for_ajax()
+            db_sess.close()
             return jsonify(dct)
         if (current_user.id == game.white_player and board.turn
                 or current_user.id == game.black_player and not board.turn):
@@ -82,12 +84,22 @@ def play_game(game_id):
                 game.is_finished = 1
                 if board.turn:
                     game.result = 'Black win'
+                    wr = rating_calculation(white_player.rating, black_player.rating, 0)
+                    br = rating_calculation(black_player.rating, white_player.rating, 1)
                 else:
                     game.result = 'White win'
+                    wr = rating_calculation(white_player.rating, black_player.rating, 1)
+                    br = rating_calculation(black_player.rating, white_player.rating, 0)
+                white_player.rating = wr
+                black_player.rating = br
             if board.is_stalemate():
                 game.is_finished = 1
                 game.result = 'Draw'
                 game.reason = 'Stalemate'
+                wr = rating_calculation(white_player.rating, black_player.rating, 0.5)
+                br = rating_calculation(black_player.rating, white_player.rating, 0.5)
+                white_player.rating = wr
+                black_player.rating = br
             db_sess.commit()
             dct_for_socket = board.get_board_for_socket()
             dct_for_socket['result'] = game.result
@@ -95,6 +107,10 @@ def play_game(game_id):
             dct_for_socket['end_game'] = game.is_finished
             socketio.emit('update_board', dct_for_socket)
         dct = board.get_board_for_ajax()
+        if not (current_user.id == game.white_player and board.turn
+                or current_user.id == game.black_player and not board.turn):
+            dct = board.get_board_for_socket()
+        db_sess.close()
         return jsonify(dct)
     lst = board.get_board()
     if current_user.is_authenticated:
@@ -106,6 +122,7 @@ def play_game(game_id):
             role = 'spectator'
     else:
         role = 'spectator'
+    db_sess.close()
     return render_template('game.html', board=lst, role=role,
                            white_player=white_player, black_player=black_player, end_game=game.is_finished,
                            result=game.result, reason=game.reason)
@@ -134,6 +151,7 @@ def register():
         user.rating = 1500
         db_sess.add(user)
         db_sess.commit()
+        db_sess.close()
         login_user(user, remember=True)
         return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
