@@ -3,6 +3,7 @@ from random import choice
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO
+from chess import Move
 
 from data import db_session
 from data.rating_calculator import rating_calculation
@@ -49,9 +50,9 @@ def new_game():
         else:
             game.black_player = current_user.id
             game.white_player = opponent.id
-        game.position = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-        game.turn = True
+        game.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         game.is_finished = False
+        game.moves = ''
         db_sess.add(game)
         db_sess.commit()
         return redirect('/game/' + str(game.id))
@@ -64,9 +65,9 @@ def play_game(game_id):
     game = db_sess.query(Game).filter(Game.id == game_id).first()
     white_player = db_sess.query(User).filter(User.id == game.white_player).first()
     black_player = db_sess.query(User).filter(User.id == game.black_player).first()
-    board = HTMLBoard(game.position)
+    board = HTMLBoard(game.fen)
     board.current = game.cell
-    board.turn = game.turn
+    board.move_stack = [Move.from_uci(move) for move in game.moves.split()]
     if request.is_json:
         if game.is_finished:
             dct = board.get_board_for_ajax()
@@ -77,8 +78,8 @@ def play_game(game_id):
             cell = request.args.get('cell')
             board.add_cell(cell)
             game.cell = board.current
-            game.position = board.board_fen()
-            game.turn = board.turn
+            game.fen = board.fen()
+            game.moves = ' '.join(move.uci() for move in board.move_stack)
             if board.is_checkmate():
                 game.reason = 'Checkmate'
                 game.is_finished = 1
@@ -125,7 +126,7 @@ def play_game(game_id):
     db_sess.close()
     return render_template('game.html', board=lst, role=role,
                            white_player=white_player, black_player=black_player, end_game=game.is_finished,
-                           result=game.result, reason=game.reason)
+                           result=game.result, reason=game.reason, turn=board.turn)
 
 
 @app.route('/register', methods=['GET', 'POST'])

@@ -50,14 +50,15 @@ class HTMLBoard(Board):
             dct = {
                 'name': square_name(i),
                 'piece': pieces[self.piece_at(i)],
-                'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
+                'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark'],
+                'add_color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
             }
             if self.current is not None:
                 if dct['name'] == self.current:
-                    dct['color'] = colors['dark-red']
+                    dct['add_color'] = colors['dark-red']
                 elif self.is_legal(Move.from_uci(self.current + dct['name'])) or self.is_legal(
                         Move.from_uci(self.current + dct['name'] + 'q')):
-                    dct['color'] = colors['light-red']
+                    dct['add_color'] = colors['light-red']
             lst.append(dct)
         return lst
 

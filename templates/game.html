@@ -19,7 +19,11 @@
             <tr>
                 {% for col in range(8) %}
                     {% set cell = board[row * 8 + col] %}
+                    {% if role == 'white' and turn or role == 'black' and not turn %}
+                    {% set color = cell['add_color'] %}
+                    {% else %}
                     {% set color = cell['color'] %}
+                    {% endif %}
                     {% set piece = cell['piece'] %}
                     {% set name = cell['name'] %}
                     <td class="cell">
