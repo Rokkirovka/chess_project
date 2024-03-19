@@ -23,3 +23,9 @@ class GameForm(FlaskForm):
     color = SelectField('Выберите свой цвет', validators=[DataRequired()],
                         choices=[('3', 'случайно'), ('1', 'белые'), ('2', 'черные')])
     submit = SubmitField('Начать игру')
+
+
+class GameEngineForm(FlaskForm):
+    color = SelectField('Выберите свой цвет', validators=[DataRequired()],
+                        choices=[('3', 'случайно'), ('1', 'белые'), ('2', 'черные')])
+    submit = SubmitField('Начать игру')

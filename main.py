@@ -5,13 +5,14 @@ from chess import Move
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO
+import chess.engine
 
 from data import db_session
 from data.chess_to_html import HTMLBoard
 from data.games import Game
 from data.rating_calculator import rating_calculation
 from data.users import User
-from forms.user import RegisterForm, GameForm, LoginForm
+from forms.user import RegisterForm, GameForm, LoginForm, GameEngineForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -60,6 +61,38 @@ def new_game():
     return render_template('create_game.html', form=form)
 
 
+@app.route('/create_engine_game', methods=['GET', 'POST'])
+@login_required
+def new_engine_game():
+    form = GameEngineForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        opponent = db_sess.query(User).get(1)
+        if not opponent:
+            return render_template('create_game.html', form=form, message="Такого игрока нет")
+        game = Game()
+        if form.color.data == '3':
+            color = choice(['1', '2'])
+        else:
+            color = form.color.data
+        if color == '1':
+            game.white_player = current_user.id
+            game.black_player = opponent.id
+        else:
+            game.black_player = current_user.id
+            game.white_player = opponent.id
+        board = HTMLBoard()
+        if color == '2':
+            board.push(engine_move(board.fen()))
+        db_sess.add(game)
+        game.fen = board.fen()
+        game.is_finished = False
+        game.moves = ' '.join(move.uci() for move in board.move_stack)
+        db_sess.commit()
+        return redirect('/game/' + str(game.id))
+    return render_template('create_engine_game.html', form=form)
+
+
 @app.route('/game/<int:game_id>')
 def play_game(game_id):
     db_sess = db_session.create_session()
@@ -79,29 +112,12 @@ def play_game(game_id):
             cell = request.args.get('cell')
             board.add_cell(cell)
             game.cell = board.current
+            check_position(board.fen(), game, white_player, black_player)
+            if game.white_player == 1 and board.turn or game.black_player == 1 and not board.turn and not game.is_finished:
+                board.push(engine_move(board.fen()))
+            check_position(board.fen(), game, white_player, black_player)
             game.fen = board.fen()
             game.moves = ' '.join(move.uci() for move in board.move_stack)
-            if board.is_checkmate():
-                game.reason = 'Checkmate'
-                game.is_finished = 1
-                if board.turn:
-                    game.result = 'Black win'
-                    wr = rating_calculation(white_player.rating, black_player.rating, 0)
-                    br = rating_calculation(black_player.rating, white_player.rating, 1)
-                else:
-                    game.result = 'White win'
-                    wr = rating_calculation(white_player.rating, black_player.rating, 1)
-                    br = rating_calculation(black_player.rating, white_player.rating, 0)
-                white_player.rating = wr
-                black_player.rating = br
-            if board.is_stalemate():
-                game.is_finished = 1
-                game.result = 'Draw'
-                game.reason = 'Stalemate'
-                wr = rating_calculation(white_player.rating, black_player.rating, 0.5)
-                br = rating_calculation(black_player.rating, white_player.rating, 0.5)
-                white_player.rating = wr
-                black_player.rating = br
             db_sess.commit()
             dct_for_socket = board.get_board_for_socket()
             dct_for_socket['result'] = game.result
@@ -206,6 +222,39 @@ def load_user(user_id):
 def logout():
     logout_user()
     return redirect("/")
+
+
+def check_position(fen, game, white_player, black_player):
+    board = HTMLBoard(fen)
+    if board.is_checkmate():
+        game.reason = 'Checkmate'
+        game.is_finished = 1
+        if board.turn:
+            game.result = 'Black win'
+            wr = rating_calculation(white_player.rating, black_player.rating, 0)
+            br = rating_calculation(black_player.rating, white_player.rating, 1)
+        else:
+            game.result = 'White win'
+            wr = rating_calculation(white_player.rating, black_player.rating, 1)
+            br = rating_calculation(black_player.rating, white_player.rating, 0)
+        white_player.rating = wr
+        black_player.rating = br
+    if board.is_stalemate():
+        game.is_finished = 1
+        game.result = 'Draw'
+        game.reason = 'Stalemate'
+        wr = rating_calculation(white_player.rating, black_player.rating, 0.5)
+        br = rating_calculation(black_player.rating, white_player.rating, 0.5)
+        white_player.rating = wr
+        black_player.rating = br
+
+
+def engine_move(fen):
+    board = HTMLBoard(fen)
+    engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
+    result = engine.play(board, chess.engine.Limit(time=0.1))
+    engine.quit()
+    return result.move
 
 
 if __name__ == '__main__':
