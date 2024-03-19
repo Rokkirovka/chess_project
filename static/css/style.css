@@ -64,10 +64,13 @@ button {
 
 .user{
     font-size: 30px;
-    text-decoration: none;
     color: black;
 }
 
 .end{
     font-size: 40px;
+}
+
+.profile-header{
+    word-spacing: 10px;
 }

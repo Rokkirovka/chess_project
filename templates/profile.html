@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ user.nick }}</h1>
+<div class="statistic">
+    <p>Статистика</p>
+    <p>Дата регистрации: {{ user.registration_date.date() }} </p>
+    <p>Рейтинг: {{ user.rating }}</p>
+    <p>Сыграно игр: {{ all_games | length }}</p>
+    {% if all_games | length == 0 %}
+    <p>Процент побед: <span>0%</span> </p>
+    <p>Процент ничьих: <span>0%</span> </p>
+    <p>Процент поражений: <span>0%</span> </p>
+    {% else %}
+    <p>Процент побед: <span>{{ win_games | length / all_games | length * 100 }}%</span> </p>
+    <p>Процент ничьих: <span>{{ draw_games | length / all_games | length * 100 }}%</span> </p>
+    <p>Процент поражений: <span>{{ loose_games | length / all_games | length * 100 }}%</span> </p>
+    {% endif %}
+</div>
+
+{% endblock %}

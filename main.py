@@ -1,14 +1,15 @@
+import datetime
 from random import choice
 
+from chess import Move
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO
-from chess import Move
 
 from data import db_session
-from data.rating_calculator import rating_calculation
 from data.chess_to_html import HTMLBoard
 from data.games import Game
+from data.rating_calculator import rating_calculation
 from data.users import User
 from forms.user import RegisterForm, GameForm, LoginForm
 
@@ -36,7 +37,7 @@ def new_game():
     form = GameForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        opponent = db_sess.query(User).filter(User.nick == form.opponent.data).first()
+        opponent = db_sess.query(User).filter(User.nick == str(form.opponent.data)).first()
         if not opponent:
             return render_template('create_game.html', form=form, message="Такого игрока нет")
         game = Game()
@@ -59,12 +60,12 @@ def new_game():
     return render_template('create_game.html', form=form)
 
 
-@app.route('/game/<game_id>')
+@app.route('/game/<int:game_id>')
 def play_game(game_id):
     db_sess = db_session.create_session()
-    game = db_sess.query(Game).filter(Game.id == game_id).first()
-    white_player = db_sess.query(User).filter(User.id == game.white_player).first()
-    black_player = db_sess.query(User).filter(User.id == game.black_player).first()
+    game = db_sess.query(Game).get(game_id)
+    white_player = db_sess.query(User).get(game.white_player)
+    black_player = db_sess.query(User).get(game.black_player)
     board = HTMLBoard(game.fen)
     board.current = game.cell
     board.move_stack = [Move.from_uci(move) for move in game.moves.split()]
@@ -129,6 +130,26 @@ def play_game(game_id):
                            result=game.result, reason=game.reason, turn=board.turn)
 
 
+@app.route('/profile/<int:user_id>')
+def profile(user_id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).get(user_id)
+    all_games = db_sess.query(Game).filter((Game.black_player == int(user.id)) |
+                                           (Game.white_player == int(user.id))).all()
+    win_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'Black win')) |
+                                           ((Game.white_player == int(user.id)) & (Game.result == 'White win'))).all()
+    draw_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
+                                             (Game.white_player == int(user.id))) & (Game.result == 'Draw')).all()
+    loose_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'White win')) |
+                                             ((Game.white_player == int(user.id)) & (Game.result == 'Black win'))).all()
+
+    return render_template('profile.html', user=user,
+                           all_games=all_games,
+                           win_games=win_games,
+                           draw_games=draw_games,
+                           loose_games=loose_games)
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
@@ -139,21 +160,22 @@ def register():
                                    form=form,
                                    message="Пароли не совпадают")
         db_sess = db_session.create_session()
-        if db_sess.query(User).filter((User.email == form.email.data) | (User.nick == form.nick.data)).first():
+        if db_sess.query(User).filter((User.email == str(form.email.data)) |
+                                      (User.nick == str(form.nick.data))).first():
             return render_template('register.html',
                                    title='Регистрация',
                                    form=form,
                                    message="Такой пользователь уже есть")
-        user = User(
-            nick=form.nick.data,
-            email=form.email.data,
-        )
+        user = User()
+        user.nick = form.nick.data
+        user.email = form.email.data
+        user.registration_date = datetime.datetime.now()
         user.set_password(form.password.data)
         user.rating = 1500
         db_sess.add(user)
         db_sess.commit()
-        db_sess.close()
         login_user(user, remember=True)
+        db_sess.close()
         return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
 
@@ -163,7 +185,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        user = db_sess.query(User).filter(User.email == str(form.email.data)).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")

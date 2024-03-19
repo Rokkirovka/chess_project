@@ -11,9 +11,13 @@
 <body>
 <nav>
     {% if current_user.is_authenticated %}
-        <a class="user" href="/logout">{{ current_user.nick }}</a>
+        <div class="profile-header">
+            <span class="user">{{ current_user.nick }}</span>
+            <a class="user" href="/profile/{{ current_user.id }}">Профиль</a>
+            <a class="user" href="/logout">Выйти</a>
+        </div>
     {% else %}
-        <p class="user">Гость</p>
+        <div class="user">Гость</div>
     {% endif %}
     <header>
         <a href="/" class="main_header">Chess</a>

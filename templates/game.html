@@ -12,7 +12,7 @@
     <div class="end"></div>
 {% endif %}
 
-<div class="user">Белые: <a href="/" class="user">{{ white_player.nick }}</a> {{ white_player.rating }}</div> <br>
+<div class="user">Белые: <a href="/profile/{{ white_player.id }}" class="user">{{ white_player.nick }}</a> {{ white_player.rating }}</div> <br>
 <table class="chess-board">
     <tbody>
         {% for row in range(7, -1, -1) %}
@@ -49,6 +49,6 @@
     </tbody>
 </table>
 <br>
-<div class="user">Черные: <a href="/" class="user">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+<div class="user">Черные: <a href="/profile/{{ black_player.id }}" class="user">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
 
 {% endblock %}

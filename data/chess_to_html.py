@@ -17,7 +17,8 @@ pieces = {Piece.from_symbol('r'): '♜',
 colors = {'light': '#eee',
           'dark': '#aaa',
           'light-red': '#ff4c5b',
-          'dark-red': '#8b0000'}
+          'dark-red': '#8b0000',
+          'light-green': '#90ee90'}
 
 
 class HTMLBoard(Board):
@@ -53,11 +54,15 @@ class HTMLBoard(Board):
                 'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark'],
                 'add_color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
             }
+            if self.move_stack:
+                if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
+                    dct['color'] = colors['light-green']
+                    dct['add_color'] = colors['light-green']
             if self.current is not None:
                 if dct['name'] == self.current:
                     dct['add_color'] = colors['dark-red']
                 elif self.is_legal(Move.from_uci(self.current + dct['name'])) or self.is_legal(
-                        Move.from_uci(self.current + dct['name'] + 'q')):
+                        Move.from_uci(self.current + square_name(i) + 'q')):
                     dct['add_color'] = colors['light-red']
             lst.append(dct)
         return lst
@@ -65,15 +70,18 @@ class HTMLBoard(Board):
     def get_board_for_ajax(self):
         dct = {'cells': {}, 'turn': self.turn}
         for i in range(64):
+            if (square_file(i) + square_rank(i)) % 2:
+                color = colors['light']
+            else:
+                color = colors['dark']
+            if self.move_stack:
+                if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
+                    color = colors['light-green']
             if square_name(i) == self.current:
                 color = colors['dark-red']
             elif self.current and (self.is_legal(Move.from_uci(self.current + square_name(i))) or self.is_legal(
                     Move.from_uci(self.current + square_name(i) + 'q'))):
                 color = colors['light-red']
-            elif (square_file(i) + square_rank(i)) % 2:
-                color = colors['light']
-            else:
-                color = colors['dark']
             dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
         return dct
 
@@ -84,5 +92,8 @@ class HTMLBoard(Board):
                 color = colors['light']
             else:
                 color = colors['dark']
+            if self.move_stack:
+                if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
+                    color = colors['light-green']
             dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
         return dct
