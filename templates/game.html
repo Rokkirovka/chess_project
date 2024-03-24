@@ -2,6 +2,16 @@
 
 {% block content %}
 
+{% if white_player is none or black_player is none %}
+
+{% if type == 'fast' %}
+Подождите, пока мы подберем вам соперника
+{% else %}
+Отправьте эту ссылку вашему сопернику: {{ url }} Первый, кто пройдет по ней, сыграет с вами.
+{% endif %}
+
+{% else %}
+
 {% if role == 'black' %}
     {% set board = board[::-1] %}
 {% endif %}
@@ -50,5 +60,6 @@
 </table>
 <br>
 <div class="user">Черные: <a href="/profile/{{ black_player.id }}" class="user">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+{% endif %}
 
 {% endblock %}

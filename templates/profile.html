@@ -7,7 +7,8 @@
     <p>Статистика</p>
     <p>Дата регистрации: {{ user.registration_date.date() }} </p>
     <p>Рейтинг: {{ user.rating }}</p>
-    <p>Сыграно игр: {{ all_games | length }}</p>
+    <p>Завершено игр: {{ all_games | length }}</p>
+    <p>Незавершенных игр: {{ unfinished_games | length }}</p>
     {% if all_games | length == 0 %}
     <p>Процент побед: <span>0%</span> </p>
     <p>Процент ничьих: <span>0%</span> </p>
@@ -18,5 +19,32 @@
     <p>Процент поражений: <span>{{ loose_games | length / all_games | length * 100 }}%</span> </p>
     {% endif %}
 </div>
+{% if unfinished_games %}
+    <p>Незавершенные игры</p>
+    {% for game in unfinished_games %}
+        <p>{{ game.id }} {{ game.white_player }} {{ game.black_player }}</p>
+    {% endfor %}
+{% endif %}
+
+{% if win_games %}
+    <p>Выигранные игры</p>
+    {% for game in win_games %}
+        <p>{{ game.id }} {{ game.white_player }} {{ game.black_player }}</p>
+    {% endfor %}
+{% endif %}
+
+{% if draw_games %}
+    <p>Игры вничью</p>
+    {% for game in draw_games %}
+        <p>{{ game.id }} {{ game.white_player }} {{ game.black_player }}</p>
+    {% endfor %}
+{% endif %}
+
+{% if loose_games %}
+    <p>Проигранные игры</p>
+    {% for game in loose_games %}
+        <p>{{ game.id }} {{ game.white_player }} {{ game.black_player }}</p>
+    {% endfor %}
+{% endif %}
 
 {% endblock %}

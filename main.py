@@ -1,11 +1,11 @@
 import datetime
 from random import choice
 
+import chess.engine
 from chess import Move
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO
-import chess.engine
 
 from data import db_session
 from data.chess_to_html import HTMLBoard
@@ -35,30 +35,61 @@ def home():
 @app.route('/create_game', methods=['GET', 'POST'])
 @login_required
 def new_game():
-    form = GameForm()
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        opponent = db_sess.query(User).filter(User.nick == str(form.opponent.data)).first()
-        if not opponent:
-            return render_template('create_game.html', form=form, message="Такого игрока нет")
-        game = Game()
-        if form.color.data == '3':
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).get(current_user.id)
+    game = Game()
+    color = choice(['1', '2'])
+    if color == '1':
+        game.white_player = user.id
+    else:
+        game.black_player = user.id
+    game.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    game.is_finished = False
+    game.moves = ''
+    game.type = 'friend'
+    db_sess.add(game)
+    db_sess.commit()
+    game_id = str(game.id)
+    db_sess.close()
+    return redirect('/game/' + game_id)
+
+
+@app.route('/fast_game', methods=['GET', 'POST'])
+@login_required
+def fast_game():
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).get(current_user.id)
+    game = db_sess.query(Game).filter(
+        ((Game.black_player == int(user.id)) | (Game.white_player == int(user.id))) & (Game.type == 'fast')).filter(
+        (Game.black_player == None) | (Game.white_player == None)).first()
+    if not game:
+        games = db_sess.query(Game).filter(
+            ((Game.black_player == None) | (Game.white_player == None)) & (Game.type == 'fast')).all()
+        if games:
+            game = choice(games)
+            print(game.white_player, game.black_player)
+            if game.white_player is None:
+                game.white_player = user.id
+            else:
+                game.black_player = user.id
+            db_sess.commit()
+            socketio.emit('reload')
+        else:
+            game = Game()
             color = choice(['1', '2'])
-        else:
-            color = form.color.data
-        if color == '1':
-            game.white_player = current_user.id
-            game.black_player = opponent.id
-        else:
-            game.black_player = current_user.id
-            game.white_player = opponent.id
-        game.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-        game.is_finished = False
-        game.moves = ''
-        db_sess.add(game)
+            if color == '1':
+                game.white_player = user.id
+            else:
+                game.black_player = user.id
+            game.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+            game.is_finished = False
+            game.moves = ''
+            game.type = 'fast'
+            db_sess.add(game)
         db_sess.commit()
-        return redirect('/game/' + str(game.id))
-    return render_template('create_game.html', form=form)
+    game_id = str(game.id)
+    db_sess.close()
+    return redirect('/game/' + game_id)
 
 
 @app.route('/create_engine_game', methods=['GET', 'POST'])
@@ -97,6 +128,13 @@ def new_engine_game():
 def play_game(game_id):
     db_sess = db_session.create_session()
     game = db_sess.query(Game).get(game_id)
+    if game.white_player is None and game.black_player != current_user.id or game.black_player is None and game.white_player != current_user.id:
+        if game.white_player is None:
+            game.white_player = current_user.id
+        else:
+            game.black_player = current_user.id
+        db_sess.commit()
+        socketio.emit('reload')
     white_player = db_sess.query(User).get(game.white_player)
     black_player = db_sess.query(User).get(game.black_player)
     board = HTMLBoard(game.fen)
@@ -113,7 +151,8 @@ def play_game(game_id):
             board.add_cell(cell)
             game.cell = board.current
             check_position(board.fen(), game, white_player, black_player)
-            if game.white_player == 1 and board.turn or game.black_player == 1 and not board.turn and not game.is_finished:
+            if (game.white_player == 1 and board.turn or game.black_player == 1 and
+                    not board.turn and not game.is_finished):
                 board.push(engine_move(board.fen()))
             check_position(board.fen(), game, white_player, black_player)
             game.fen = board.fen()
@@ -143,27 +182,30 @@ def play_game(game_id):
     db_sess.close()
     return render_template('game.html', board=lst, role=role,
                            white_player=white_player, black_player=black_player, end_game=game.is_finished,
-                           result=game.result, reason=game.reason, turn=board.turn)
+                           result=game.result, reason=game.reason, turn=board.turn, type=game.type, url=request.url)
 
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
     db_sess = db_session.create_session()
     user = db_sess.query(User).get(user_id)
-    all_games = db_sess.query(Game).filter((Game.black_player == int(user.id)) |
-                                           (Game.white_player == int(user.id))).all()
+    all_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
+                                            (Game.white_player == int(user.id))) & (Game.is_finished == 1)).all()
     win_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'Black win')) |
                                            ((Game.white_player == int(user.id)) & (Game.result == 'White win'))).all()
     draw_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
                                              (Game.white_player == int(user.id))) & (Game.result == 'Draw')).all()
     loose_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'White win')) |
                                              ((Game.white_player == int(user.id)) & (Game.result == 'Black win'))).all()
+    unfinished_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
+                                                   (Game.white_player == int(user.id))) & (Game.is_finished == 0)).all()
 
     return render_template('profile.html', user=user,
                            all_games=all_games,
                            win_games=win_games,
                            draw_games=draw_games,
-                           loose_games=loose_games)
+                           loose_games=loose_games,
+                           unfinished_games=unfinished_games)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -204,7 +246,9 @@ def login():
         user = db_sess.query(User).filter(User.email == str(form.email.data)).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
+            db_sess.close()
             return redirect("/")
+        db_sess.close()
         return render_template('login.html',
                                message="Неправильный логин или пароль",
                                form=form)
@@ -214,7 +258,9 @@ def login():
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
-    return db_sess.query(User).get(user_id)
+    user = db_sess.query(User).get(user_id)
+    db_sess.close()
+    return user
 
 
 @app.route('/logout')

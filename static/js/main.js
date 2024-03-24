@@ -26,3 +26,6 @@ socket.on('update_board', (response) => {
         $('.chess-board [name=' + cell + ']').css('background-color', response.cells[cell]['color']);
     }
 });
+socket.on('reload', function() {
+    location.reload();
+});

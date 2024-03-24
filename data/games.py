@@ -14,3 +14,4 @@ class Game(SqlAlchemyBase, SerializerMixin):
     result = sqlalchemy.Column(sqlalchemy.String)
     reason = sqlalchemy.Column(sqlalchemy.String)
     is_finished = sqlalchemy.Column(sqlalchemy.Boolean)
+    type = sqlalchemy.Column(sqlalchemy.String)
