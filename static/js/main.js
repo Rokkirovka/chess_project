@@ -1,4 +1,8 @@
 const socket = io();
+
+let cell1 = null;
+
+
 $(document).ready(function(){
     $('.chess-board .cell-button').click(function(){
         $.ajax({
@@ -17,6 +21,7 @@ $(document).ready(function(){
         })
     })
 });
+
 socket.on('update_board', (response) => {
     if (response.end_game == true){
         $('.end').text(response.result + ' • ' + response.reason)
@@ -26,6 +31,7 @@ socket.on('update_board', (response) => {
         $('.chess-board [name=' + cell + ']').css('background-color', response.cells[cell]['color']);
     }
 });
+
 socket.on('reload', function() {
     location.reload();
 });

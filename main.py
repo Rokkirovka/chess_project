@@ -128,18 +128,17 @@ def new_engine_game():
 def play_game(game_id):
     db_sess = db_session.create_session()
     game = db_sess.query(Game).get(game_id)
-    if game.white_player is None and game.black_player != current_user.id or game.black_player is None and game.white_player != current_user.id:
-        if game.white_player is None:
-            game.white_player = current_user.id
-        else:
-            game.black_player = current_user.id
-        db_sess.commit()
-        socketio.emit('reload')
+    if current_user.is_authenticated:
+        if game.white_player is None and game.black_player != current_user.id or game.black_player is None and game.white_player != current_user.id:
+            if game.white_player is None:
+                game.white_player = current_user.id
+            else:
+                game.black_player = current_user.id
+            db_sess.commit()
+            socketio.emit('reload')
+    board = get_board_game(game)
     white_player = db_sess.query(User).get(game.white_player)
     black_player = db_sess.query(User).get(game.black_player)
-    board = HTMLBoard(game.fen)
-    board.current = game.cell
-    board.move_stack = [Move.from_uci(move) for move in game.moves.split()]
     if request.is_json:
         if game.is_finished:
             dct = board.get_board_for_ajax()
@@ -191,14 +190,19 @@ def profile(user_id):
     user = db_sess.query(User).get(user_id)
     all_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
                                             (Game.white_player == int(user.id))) & (Game.is_finished == 1)).all()
+    all_games = {x.id: [x, get_board_game(x).get_board()] for x in all_games}
     win_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'Black win')) |
                                            ((Game.white_player == int(user.id)) & (Game.result == 'White win'))).all()
+    win_games = {x.id: [x, get_board_game(x).get_board()] for x in win_games}
     draw_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
                                              (Game.white_player == int(user.id))) & (Game.result == 'Draw')).all()
+    draw_games = {x.id: [x, get_board_game(x).get_board()] for x in draw_games}
     loose_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'White win')) |
                                              ((Game.white_player == int(user.id)) & (Game.result == 'Black win'))).all()
+    loose_games = {x.id: [x, get_board_game(x).get_board()] for x in loose_games}
     unfinished_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
                                                    (Game.white_player == int(user.id))) & (Game.is_finished == 0)).all()
+    unfinished_games = {x.id: [x, get_board_game(x).get_board()] for x in unfinished_games}
 
     return render_template('profile.html', user=user,
                            all_games=all_games,
@@ -293,6 +297,13 @@ def check_position(fen, game, white_player, black_player):
         br = rating_calculation(black_player.rating, white_player.rating, 0.5)
         white_player.rating = wr
         black_player.rating = br
+
+
+def get_board_game(game):
+    board = HTMLBoard(game.fen)
+    board.current = game.cell
+    board.move_stack = [Move.from_uci(move) for move in game.moves.split()]
+    return board
 
 
 def engine_move(fen):

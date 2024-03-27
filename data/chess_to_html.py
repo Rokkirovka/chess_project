@@ -14,11 +14,12 @@ pieces = {Piece.from_symbol('r'): '♜',
           Piece.from_symbol('P'): '♙',
           None: ''}
 
-colors = {'light': '#eee',
-          'dark': '#aaa',
-          'light-red': '#ff4c5b',
-          'dark-red': '#8b0000',
-          'light-green': '#90ee90'}
+colors = {'light': '#e9eef2',
+          'dark': ' #8ca2ad',
+          'light-red': '#507b65',
+          'dark-red': '#789b81',
+          'light-green': '#c3d888',
+          'light-purple': '#876c99'}
 
 
 class HTMLBoard(Board):
@@ -58,6 +59,12 @@ class HTMLBoard(Board):
                 if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
                     dct['color'] = colors['light-green']
                     dct['add_color'] = colors['light-green']
+            if self.piece_at(i) == Piece.from_symbol('K') and self.turn and self.is_check():
+                dct['color'] = colors['light-purple']
+                dct['add_color'] = colors['light-purple']
+            if self.piece_at(i) == Piece.from_symbol('k') and not self.turn and self.is_check():
+                dct['color'] = colors['light-purple']
+                dct['add_color'] = colors['light-purple']
             if self.current is not None:
                 if dct['name'] == self.current:
                     dct['add_color'] = colors['dark-red']
@@ -77,6 +84,10 @@ class HTMLBoard(Board):
             if self.move_stack:
                 if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
                     color = colors['light-green']
+            if self.piece_at(i) == Piece.from_symbol('K') and self.turn and self.is_check():
+                color = colors['light-purple']
+            if self.piece_at(i) == Piece.from_symbol('k') and not self.turn and self.is_check():
+                color = colors['light-purple']
             if square_name(i) == self.current:
                 color = colors['dark-red']
             elif self.current and (self.is_legal(Move.from_uci(self.current + square_name(i))) or self.is_legal(

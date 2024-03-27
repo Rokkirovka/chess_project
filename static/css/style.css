@@ -1,38 +1,118 @@
-html{
+html {
     background-color: #e5eaf5;
+    font-family: Arial, sans-serif;
 }
+body {
+    margin: 0;
+    padding: 0;
+    }
 
-.main_header{
-    color: black;
-    font-size: 50pt;
+.menu {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #2c3e50;
+    overflow: hidden;
+}
+.menu-row {
+    float: left;
+}
+.menu-item {
+    display: block;
+    color: white;
     text-align: center;
-    display:block;
+    padding: 10% 25px;
+    font-size: 30px;
     text-decoration: none;
 }
+
+.home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    margin: 0;
+}
+.home-items {
+    text-align: center;
+    background-color: #2c3e50;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.home-item {
+    margin: 10px;
+    font-size: 20px;
+    color: white;
+    font-size: 50px;
+    text-decoration: none;
+    line-height: 100px;
+}
+
+.form-item {
+    margin: 10px;
+    font-size: 20px;
+    color: white;
+    font-size: 40px;
+    line-height: 50px;
+}
+.form-control{
+    width: 200px;
+    height: 25px;
+    border-radius: 5px;
+    font-size: 25px;
+}
+.form-button{
+    width: 220px;
+    height: 35px;
+    border-radius: 5px;
+    background-color: white;
+    font-size: 20px;
+}
+.form-remember{
+    border-radius: 5px;
+    color: red;
+    font-size: 20px;
+}
+
+.party{
+    display: flex;
+    justify-content: center;
+}
+.game-info {
+    margin-top: 20%;
+    height: 150px;
+    width: 350px;
+    transform: translateX(-100%);
+    background-color: #2c3e50;
+    border-radius: 10px;
+    color: white;
+    font-size: 25px;
+    line-height: 50px;
+}
+.user-link{
+    color: white;
+}
+
 .chess-board{
+    margin-top: 5%;
     table-layout: fixed;
     background-color: white;
-}
-
-.center{
-text-align: center;
-}
-
-.chess-board{
-    margin-left: auto;
-    margin-right: auto;
     border-collapse: collapse;
+    float: left;
+    transform: translateX(-15%);
 }
 
 .chess-board .cell {
-    height: 70pt;
-    width: 70pt;
+    height: 90px;
+    width: 90px;
     box-sizing: border-box;
 }
 
 .chess-board .cell-button{
     height: 100%;
     width: 100%;
+    color: black;
 }
 
 .chess-board .cell-button-hollow{
@@ -46,13 +126,6 @@ text-align: center;
     font-size: 40pt;
 }
 
-.home{
-    text-decoration: none;
-    font-family: 'Arial';
-    font-size: 40px;
-    color: black;
-}
-
 button {
     background-color: transparent;
     background-repeat: no-repeat;
@@ -62,15 +135,58 @@ button {
     outline: none;
 }
 
-.user{
-    font-size: 30px;
-    color: black;
-}
-
-.end{
-    font-size: 40px;
-}
-
 .profile-header{
     word-spacing: 10px;
+}
+.statistic {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+.statistic-items {
+    text-align: center;
+    background-color: #2c3e50;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.statistic-item {
+    margin: 10px;
+    font-size: 20px;
+    color: white;
+    font-size: 30px;
+    text-decoration: none;
+    line-height: 60px;
+}
+.user {
+    text-align: center;
+    font-size: 50px;
+    color: #2c3e50;
+}
+.games-heading {
+    color: #2c3e50;
+    font-size: 35px;
+}
+.games {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.chess-board-mini{
+    table-layout: fixed;
+    border-collapse: collapse;
+    padding: 25px 25px;
+    display: block;
+}
+.chess-board-mini .cell {
+    height: 40px;
+    width: 40px;
+    box-sizing: border-box;
+}
+.chess-board-mini .cell-piece{
+    height: 100%;
+    width: 100%;
+    font-size: 25px;
 }

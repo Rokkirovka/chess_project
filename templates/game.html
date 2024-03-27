@@ -3,26 +3,30 @@
 {% block content %}
 
 {% if white_player is none or black_player is none %}
-
-{% if type == 'fast' %}
-Подождите, пока мы подберем вам соперника
+    {% if not current_user.is_authenticated %}
+        Незарегистрированный пользователь не может принять игру
+    {% else %}
+        {% if type == 'fast' %}
+            Подождите, пока мы подберем вам соперника
+        {% else %}
+            Отправьте эту ссылку вашему сопернику: {{ url }} Первый, кто пройдет по ней, сыграет с вами.
+        {% endif %}
+    {% endif %}
 {% else %}
-Отправьте эту ссылку вашему сопернику: {{ url }} Первый, кто пройдет по ней, сыграет с вами.
-{% endif %}
+    {% if role == 'black' %}
+        {% set board = board[::-1] %}
+    {% endif %}
 
-{% else %}
-
-{% if role == 'black' %}
-    {% set board = board[::-1] %}
-{% endif %}
-
-{% if end_game %}
-    <div class="end">{{ result }} • {{ reason }}</div>
-{% else %}
-    <div class="end"></div>
-{% endif %}
-
-<div class="user">Белые: <a href="/profile/{{ white_player.id }}" class="user">{{ white_player.nick }}</a> {{ white_player.rating }}</div> <br>
+<div class="party">
+    <div class="game-info">
+        {% if end_game %}
+            <div class="end">{{ result }} • {{ reason }}</div>
+        {% else %}
+            <div class="end"></div>
+        {% endif %}
+        <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> {{ white_player.rating }}</div>
+        <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+    </div>
 <table class="chess-board">
     <tbody>
         {% for row in range(7, -1, -1) %}
@@ -59,7 +63,7 @@
     </tbody>
 </table>
 <br>
-<div class="user">Черные: <a href="/profile/{{ black_player.id }}" class="user">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+</div>
 {% endif %}
 
 {% endblock %}
