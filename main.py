@@ -2,13 +2,13 @@ import datetime
 from random import choice
 
 import chess.engine
-from chess import Move
+from chess import Move, parse_square
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO
 
 from data import db_session
-from data.chess_to_html import HTMLBoard
+from data.chess_to_html import ImprovedBoard
 from data.games import Game
 from data.rating_calculator import rating_calculation
 from data.users import User
@@ -112,7 +112,7 @@ def new_engine_game():
         else:
             game.black_player = current_user.id
             game.white_player = opponent.id
-        board = HTMLBoard()
+        board = ImprovedBoard()
         if color == '2':
             board.push(engine_move(board.fen()))
         db_sess.add(game)
@@ -140,35 +140,28 @@ def play_game(game_id):
     white_player = db_sess.query(User).get(game.white_player)
     black_player = db_sess.query(User).get(game.black_player)
     if request.is_json:
-        if game.is_finished:
-            dct = board.get_board_for_ajax()
-            db_sess.close()
-            return jsonify(dct)
-        if (current_user.id == game.white_player and board.turn
-                or current_user.id == game.black_player and not board.turn):
-            cell = request.args.get('cell')
-            board.add_cell(cell)
-            game.cell = board.current
-            check_position(board.fen(), game, white_player, black_player)
-            if (game.white_player == 1 and board.turn or game.black_player == 1 and
-                    not board.turn and not game.is_finished):
-                board.push(engine_move(board.fen()))
-            check_position(board.fen(), game, white_player, black_player)
-            game.fen = board.fen()
-            game.moves = ' '.join(move.uci() for move in board.move_stack)
-            db_sess.commit()
-            dct_for_socket = board.get_board_for_socket()
-            dct_for_socket['result'] = game.result
-            dct_for_socket['reason'] = game.reason
-            dct_for_socket['end_game'] = game.is_finished
-            socketio.emit('update_board', dct_for_socket)
-        dct = board.get_board_for_ajax()
-        if not (current_user.id == game.white_player and board.turn
-                or current_user.id == game.black_player and not board.turn):
-            dct = board.get_board_for_socket()
-        db_sess.close()
-        return jsonify(dct)
-    lst = board.get_board()
+        if current_user == white_player and board.turn or current_user == black_player and not board.turn:
+            if request.args.get('type') == 'cell':
+                cell = request.args.get('cell')
+                if board.color_at(parse_square(cell)) == board.turn:
+                    cur = cell
+                else:
+                    cur = None
+            else:
+                cur = board.make_move(request.args.get('move'))
+                check_position(board.fen(), game, white_player, black_player)
+                if (game.white_player == 1 and board.turn or game.black_player == 1 and
+                        not board.turn and not game.is_finished):
+                    board.push(engine_move(board.fen()))
+                check_position(board.fen(), game, white_player, black_player)
+                game.fen = board.fen()
+                game.moves = ' '.join(move.uci() for move in board.move_stack)
+                db_sess.commit()
+                db_sess.close()
+                socketio.emit('update_board', board.get_board_for_json())
+            return jsonify(board.get_board_for_json(cur))
+        return jsonify(board.get_board_for_json())
+    lst = board.get_board_for_json()
     if current_user.is_authenticated:
         if current_user.id == game.white_player:
             role = 'white'
@@ -275,7 +268,7 @@ def logout():
 
 
 def check_position(fen, game, white_player, black_player):
-    board = HTMLBoard(fen)
+    board = ImprovedBoard(fen)
     if board.is_checkmate():
         game.reason = 'Checkmate'
         game.is_finished = 1
@@ -300,14 +293,13 @@ def check_position(fen, game, white_player, black_player):
 
 
 def get_board_game(game):
-    board = HTMLBoard(game.fen)
-    board.current = game.cell
+    board = ImprovedBoard(game.fen)
     board.move_stack = [Move.from_uci(move) for move in game.moves.split()]
     return board
 
 
 def engine_move(fen):
-    board = HTMLBoard(fen)
+    board = ImprovedBoard(fen)
     engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
     result = engine.play(board, chess.engine.Limit(time=0.1))
     engine.quit()

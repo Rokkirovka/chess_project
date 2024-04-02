@@ -14,7 +14,7 @@
     {% endif %}
 {% else %}
     {% if role == 'black' %}
-        {% set board = board[::-1] %}
+        {% set board = board[:-1][::-1] %}
     {% endif %}
 
 <div class="party">
@@ -33,29 +33,18 @@
             <tr>
                 {% for col in range(8) %}
                     {% set cell = board[row * 8 + col] %}
-                    {% if role == 'white' and turn or role == 'black' and not turn %}
-                    {% set color = cell['add_color'] %}
-                    {% else %}
                     {% set color = cell['color'] %}
-                    {% endif %}
                     {% set piece = cell['piece'] %}
                     {% set name = cell['name'] %}
-                    <td class="cell">
-                        {% if role == 'spectator' or end_game %}
-                        <button
-                                name="{{ name }}"
-                                class="cell-button-hollow"
-                                style="background-color: {{ color }};">
-                            <span class="cell-piece">{{ piece }}</span>
-                        </button>
-                        {% else %}
-                        <button
-                                name="{{ name }}"
-                                class="cell-button"
-                                style="background-color: {{ color }};">
-                            <span class="cell-piece">{{ piece }}</span>
-                        </button>
-                        {% endif %}
+                    <td class="cell"
+                            draggable="true"
+                            ondragstart="cell_start_drag(this.id)"
+                            ondragover="cell_drag_over(event)"
+                            ondrop="cell_drop(this.id)"
+                            onclick="cell_click(this.id)"
+                            style="background-color: {{ color }};"
+                            id="{{ name }}">
+                        <span class="cell-piece">{{ piece }}</span>
                     </td>
                 {% endfor %}
             </tr>

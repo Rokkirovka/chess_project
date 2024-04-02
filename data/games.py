@@ -8,7 +8,6 @@ class Game(SqlAlchemyBase, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     white_player = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
     black_player = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
-    cell = sqlalchemy.Column(sqlalchemy.String)
     moves = sqlalchemy.Column(sqlalchemy.String)
     fen = sqlalchemy.Column(sqlalchemy.String)
     result = sqlalchemy.Column(sqlalchemy.String)

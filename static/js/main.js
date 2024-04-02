@@ -1,37 +1,61 @@
 const socket = io();
 
-let cell1 = null;
-
-
-$(document).ready(function(){
-    $('.chess-board .cell-button').click(function(){
-        $.ajax({
-            url: '',
-            type: 'get',
-            contentType: 'application/json',
-            data: {
-                cell: $(this).attr('name')
-            },
-            success: function(response){
-                for (var cell in response.cells){
-                    $('.chess-board [name=' + cell + '] .cell-piece').text(response.cells[cell]['piece']);
-                    $('.chess-board [name=' + cell + ']').css('background-color', response.cells[cell]['color']);
-                }
-            }
-        })
-    })
-});
+window.cell = null;
 
 socket.on('update_board', (response) => {
     if (response.end_game == true){
         $('.end').text(response.result + ' • ' + response.reason)
     }
-    for (var cell in response.cells){
-        $('.chess-board [name=' + cell + '] .cell-piece').text(response.cells[cell]['piece']);
-        $('.chess-board [name=' + cell + ']').css('background-color', response.cells[cell]['color']);
-    }
+    print_board(response)
 });
 
 socket.on('reload', function() {
     location.reload();
 });
+
+function cell_start_drag(id) {
+    window.cell = id
+    $.ajax({url: '', type: 'get', contentType: 'application/json',
+        data: {type: 'cell', cell: window.cell}, success: print_board
+    })
+}
+
+function cell_drag_over(event) {
+    event.preventDefault();
+}
+
+
+function cell_drop(id) {
+    let move = window.cell + id;
+    $.ajax({
+        url: '', type: 'get', contentType: 'application/json',
+        data: {type: 'move', move: move}
+    })
+}
+
+
+function cell_click(id) {
+    if (window.cell == null){
+        $.ajax({
+            url: '', type: 'get', contentType: 'application/json',
+            data: {type: 'cell', cell: id}, success: print_board
+        })
+    }
+    else {
+        let move = window.cell + id
+        window.cell = null
+        $.ajax({
+            url: '', type: 'get', contentType: 'application/json',
+            data: {type: 'move', move: move}, success: print_board
+        })
+    }
+}
+
+
+function print_board(response){
+    for (var cell in response.slice(0, -1)){
+        $('.chess-board [id=' + response[cell].name + '] .cell-piece').text(response[cell].piece);
+        $('.chess-board [id=' + response[cell].name + ']').css('background-color', response[cell].color);
+    };
+    window.cell = response[response.length - 1].current;
+}

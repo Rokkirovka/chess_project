@@ -107,32 +107,14 @@ body {
     height: 90px;
     width: 90px;
     box-sizing: border-box;
-}
-
-.chess-board .cell-button{
-    height: 100%;
-    width: 100%;
-    color: black;
-}
-
-.chess-board .cell-button-hollow{
-    height: 100%;
-    width: 100%;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .chess-board .cell-piece{
     height: 100%;
     width: 100%;
     font-size: 40pt;
-}
-
-button {
-    background-color: transparent;
-    background-repeat: no-repeat;
-    border: none;
-    cursor: pointer;
-    overflow: hidden;
-    outline: none;
 }
 
 .profile-header{

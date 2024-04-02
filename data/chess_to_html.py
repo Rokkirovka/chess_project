@@ -22,89 +22,40 @@ colors = {'light': '#e9eef2',
           'light-purple': '#876c99'}
 
 
-class HTMLBoard(Board):
-    current = None
+class ImprovedBoard(Board):
+    def make_move(self, move):
+        current = None
+        if move[:2] == move[2:]:
+            current = None
+        elif self.color_at(parse_square(move[2:])) == self.turn:
+            current = move[2:]
+        if move[:2] != move[2:]:
+            push_move = Move.from_uci(move)
+            if self.is_legal(push_move):
+                self.push(push_move)
+                current = None
+        return current
 
-    def add_cell(self, cell):
-        if self.current is None:
-            if self.color_at(parse_square(cell)) == self.turn:
-                self.current = cell
-        elif cell == self.current:
-            self.current = None
-        else:
-            if (pieces[self.piece_at(parse_square(self.current))] == '♙' and self.current[1] == '7' and cell[1] == '8'
-                    or pieces[self.piece_at(parse_square(self.current))] == '♟' and self.current[1] == '2' and cell[
-                        1] == '1'):
-                move = Move.from_uci(self.current + cell + 'q')
-            else:
-                move = Move.from_uci(self.current + cell)
-            if not self.is_legal(move):
-                self.current = None
-                if self.color_at(parse_square(cell)) == self.turn:
-                    self.current = cell
-            else:
-                self.push(move)
-                self.current = None
-
-    def get_board(self):
-        lst = []
+    def get_board_for_json(self, selected=None):
+        json_board = []
         for i in range(64):
-            dct = {
+            cell = {
                 'name': square_name(i),
                 'piece': pieces[self.piece_at(i)],
-                'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark'],
-                'add_color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
+                'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
             }
             if self.move_stack:
                 if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
-                    dct['color'] = colors['light-green']
-                    dct['add_color'] = colors['light-green']
+                    cell['color'] = colors['light-green']
             if self.piece_at(i) == Piece.from_symbol('K') and self.turn and self.is_check():
-                dct['color'] = colors['light-purple']
-                dct['add_color'] = colors['light-purple']
+                cell['color'] = colors['light-purple']
             if self.piece_at(i) == Piece.from_symbol('k') and not self.turn and self.is_check():
-                dct['color'] = colors['light-purple']
-                dct['add_color'] = colors['light-purple']
-            if self.current is not None:
-                if dct['name'] == self.current:
-                    dct['add_color'] = colors['dark-red']
-                elif self.is_legal(Move.from_uci(self.current + dct['name'])) or self.is_legal(
-                        Move.from_uci(self.current + square_name(i) + 'q')):
-                    dct['add_color'] = colors['light-red']
-            lst.append(dct)
-        return lst
-
-    def get_board_for_ajax(self):
-        dct = {'cells': {}, 'turn': self.turn}
-        for i in range(64):
-            if (square_file(i) + square_rank(i)) % 2:
-                color = colors['light']
-            else:
-                color = colors['dark']
-            if self.move_stack:
-                if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
-                    color = colors['light-green']
-            if self.piece_at(i) == Piece.from_symbol('K') and self.turn and self.is_check():
-                color = colors['light-purple']
-            if self.piece_at(i) == Piece.from_symbol('k') and not self.turn and self.is_check():
-                color = colors['light-purple']
-            if square_name(i) == self.current:
-                color = colors['dark-red']
-            elif self.current and (self.is_legal(Move.from_uci(self.current + square_name(i))) or self.is_legal(
-                    Move.from_uci(self.current + square_name(i) + 'q'))):
-                color = colors['light-red']
-            dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
-        return dct
-
-    def get_board_for_socket(self):
-        dct = {'cells': {}, 'turn': self.turn}
-        for i in range(64):
-            if (square_file(i) + square_rank(i)) % 2:
-                color = colors['light']
-            else:
-                color = colors['dark']
-            if self.move_stack:
-                if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
-                    color = colors['light-green']
-            dct['cells'][square_name(i)] = {'piece': pieces[self.piece_at(i)], 'color': color}
-        return dct
+                cell['color'] = colors['light-purple']
+            if selected is not None:
+                if selected == square_name(i):
+                    cell['color'] = colors['dark-red']
+                elif self.is_legal(Move.from_uci(selected + square_name(i))):
+                    cell['color'] = colors['light-red']
+            json_board.append(cell)
+        json_board.append({'current': selected})
+        return json_board
