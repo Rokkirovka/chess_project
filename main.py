@@ -9,7 +9,7 @@ from flask_socketio import SocketIO
 
 from data import db_session
 from data.chess_to_html import ImprovedBoard
-from data.games import Game
+from data.games import Game, EngineGame
 from data.rating_calculator import rating_calculation
 from data.users import User
 from forms.user import RegisterForm, GameForm, LoginForm, GameEngineForm
@@ -98,35 +98,86 @@ def new_engine_game():
     form = GameEngineForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        opponent = db_sess.query(User).get(1)
-        if not opponent:
-            return render_template('create_game.html', form=form, message="Такого игрока нет")
-        game = Game()
+        old_game = db_sess.query(EngineGame).filter(EngineGame.player == int(current_user.id)).first()
+        if old_game:
+            db_sess.delete(old_game)
+        game = EngineGame()
         if form.color.data == '3':
-            color = choice(['1', '2'])
+            color = choice(['white', 'black'])
         else:
             color = form.color.data
-        if color == '1':
-            game.white_player = current_user.id
-            game.black_player = opponent.id
-        else:
-            game.black_player = current_user.id
-            game.white_player = opponent.id
         board = ImprovedBoard()
-        if color == '2':
-            board.push(engine_move(board.fen()))
+        game.level = form.level.data
+        if color == 'black':
+            board.push(engine_move(board.fen(), game.level))
         db_sess.add(game)
         game.fen = board.fen()
         game.is_finished = False
         game.moves = ' '.join(move.uci() for move in board.move_stack)
+        game.color = color
+        game.player = current_user.id
         db_sess.commit()
-        return redirect('/game/' + str(game.id))
+        db_sess.close()
+        return redirect(f'/engine_game/{current_user.id}')
     return render_template('create_engine_game.html', form=form)
+
+
+@app.route('/engine_game/<int:user_id>')
+@login_required
+def play_engine_game(user_id):
+    db_sess = db_session.create_session()
+
+    game = db_sess.query(EngineGame).filter(EngineGame.player == int(user_id)).first()
+    if not game:
+        return redirect('/create_engine_game')
+    board = get_board_game(game)
+    player = db_sess.query(User).get(game.player)
+    color = game.color
+    if color == 'white':
+        white_player = player
+        black_player = None
+    else:
+        white_player = None
+        black_player = player
+    if request.is_json:
+        if current_user.id == user_id:
+            if color == 'white' and board.turn or color == 'black' and not board.turn:
+                if request.args.get('type') == 'cell':
+                    cell = request.args.get('cell')
+                    if board.color_at(parse_square(cell)) == board.turn:
+                        cur = cell
+                    else:
+                        cur = None
+                else:
+                    cur = board.make_move(request.args.get('move'))
+                    update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
+                    socketio.emit('update_board', board.get_board_for_json())
+                    if color == 'white' and not board.turn or color == 'black' and board.turn and not game.is_finished:
+                        board.push(engine_move(board.fen(), game.level))
+                    update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
+                    game.fen = board.fen()
+                    game.moves = ' '.join(move.uci() for move in board.move_stack)
+                    db_sess.commit()
+                    db_sess.close()
+                    socketio.emit('update_board', board.get_board_for_json())
+                return jsonify(board.get_board_for_json(cur))
+            return jsonify(board.get_board_for_json())
+        return jsonify(board.get_board_for_json())
+    lst = board.get_board_for_json()
+    if current_user.id == user_id:
+        role = color
+    else:
+        role = 'spectator'
+    db_sess.close()
+    return render_template('game.html', board=lst, role=role,
+                           white_player=white_player, black_player=black_player, end_game=game.is_finished,
+                           result=game.result, reason=game.reason, turn=board.turn, type='engine', url=request.url)
 
 
 @app.route('/game/<int:game_id>')
 def play_game(game_id):
     db_sess = db_session.create_session()
+
     game = db_sess.query(Game).get(game_id)
     if current_user.is_authenticated:
         if game.white_player is None and game.black_player != current_user.id or game.black_player is None and game.white_player != current_user.id:
@@ -149,16 +200,16 @@ def play_game(game_id):
                     cur = None
             else:
                 cur = board.make_move(request.args.get('move'))
-                check_position(board.fen(), game, white_player, black_player)
+                update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
+                socketio.emit('update_board', board.get_board_for_json())
                 if (game.white_player == 1 and board.turn or game.black_player == 1 and
                         not board.turn and not game.is_finished):
-                    board.push(engine_move(board.fen()))
-                check_position(board.fen(), game, white_player, black_player)
+                    board.push(engine_move(board.fen(), game.level))
+                update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
                 game.fen = board.fen()
                 game.moves = ' '.join(move.uci() for move in board.move_stack)
                 db_sess.commit()
                 db_sess.close()
-                socketio.emit('update_board', board.get_board_for_json())
             return jsonify(board.get_board_for_json(cur))
         return jsonify(board.get_board_for_json())
     lst = board.get_board_for_json()
@@ -267,29 +318,43 @@ def logout():
     return redirect("/")
 
 
-def check_position(fen, game, white_player, black_player):
+def check_position(fen, white_player=None, black_player=None):
+    wr, br = None, None
+    is_finished = 1
     board = ImprovedBoard(fen)
     if board.is_checkmate():
-        game.reason = 'Checkmate'
-        game.is_finished = 1
+        reason = 'Checkmate'
         if board.turn:
-            game.result = 'Black win'
-            wr = rating_calculation(white_player.rating, black_player.rating, 0)
-            br = rating_calculation(black_player.rating, white_player.rating, 1)
+            result = 'Black win'
+            if white_player is not None and black_player is not None:
+                wr = rating_calculation(white_player.rating, black_player.rating, 0)
+                br = rating_calculation(black_player.rating, white_player.rating, 1)
         else:
-            game.result = 'White win'
-            wr = rating_calculation(white_player.rating, black_player.rating, 1)
-            br = rating_calculation(black_player.rating, white_player.rating, 0)
-        white_player.rating = wr
-        black_player.rating = br
-    if board.is_stalemate():
-        game.is_finished = 1
-        game.result = 'Draw'
-        game.reason = 'Stalemate'
+            result = 'White win'
+            if white_player is not None and black_player is not None:
+                wr = rating_calculation(white_player.rating, black_player.rating, 1)
+                br = rating_calculation(black_player.rating, white_player.rating, 0)
+    elif board.is_stalemate():
+        result = 'Draw'
+        reason = 'Stalemate'
         wr = rating_calculation(white_player.rating, black_player.rating, 0.5)
         br = rating_calculation(black_player.rating, white_player.rating, 0.5)
+    else:
+        reason, is_finished, result = None, 0, None
+    return result, reason, is_finished, wr, br
+
+
+def update_game(game, result, reason, is_finished, wr, br, white_player, black_player):
+    if is_finished:
+        game.is_finished = 1
+        game.result = result
+        game.reason = reason
+    if wr is not None and br is not None:
         white_player.rating = wr
         black_player.rating = br
+    return
+
+
 
 
 def get_board_game(game):
@@ -298,10 +363,11 @@ def get_board_game(game):
     return board
 
 
-def engine_move(fen):
+def engine_move(fen, level):
     board = ImprovedBoard(fen)
     engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
-    result = engine.play(board, chess.engine.Limit(time=0.1))
+    engine.configure({"Skill Level": level})
+    result = engine.play(board, chess.engine.Limit(time=0.3))
     engine.quit()
     return result.move
 

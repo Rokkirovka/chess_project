@@ -13,6 +13,14 @@
                     {{ error }}
                 </p>
             {% endfor %}
+        <p>
+            <span class="form-item">{{ form.level.label }}</span><br>
+            {{ form.level(class="form-control") }}<br>
+            {% for error in form.level.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
         <p>{{ form.submit(type="submit", class="btn form-button") }}</p>
         {{message}}
     </form>

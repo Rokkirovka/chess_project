@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% if white_player is none or black_player is none %}
+{% if (white_player is none or black_player is none) and type != 'engine' %}
     {% if not current_user.is_authenticated %}
         Незарегистрированный пользователь не может принять игру
     {% else %}
@@ -24,8 +24,16 @@
         {% else %}
             <div class="end"></div>
         {% endif %}
-        <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> {{ white_player.rating }}</div>
-        <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+        {% if white_player != none %}
+            <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> {{ white_player.rating }}</div>
+        {% else %}
+            <div>Белые: Stockfish</div>
+        {% endif %}
+        {% if black_player != none %}
+            <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+        {% else %}
+            <div>Черные: Stockfish</div>
+        {% endif %}
     </div>
 <table class="chess-board">
     <tbody>
