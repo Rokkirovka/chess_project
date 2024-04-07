@@ -1,18 +1,24 @@
 html {
+    height: 100%;
     background-color: #e5eaf5;
     font-family: Arial, sans-serif;
 }
 body {
+    min-height: 100%;
     margin: 0;
     padding: 0;
     }
 
 .menu {
+    position: absolute;
     list-style-type: none;
     margin: 0;
     padding: 0;
     background-color: #2c3e50;
     overflow: hidden;
+    width: 100%;
+    height: 8%;
+    font-size: 4vh;
 }
 .menu-row {
     float: left;
@@ -22,7 +28,6 @@ body {
     color: white;
     text-align: center;
     padding: 10% 25px;
-    font-size: 30px;
     text-decoration: none;
 }
 
@@ -76,36 +81,55 @@ body {
 }
 
 .party{
-    display: flex;
-    justify-content: center;
+    width: 100%;
+    height: 80%;
+    position: absolute;
+    top: 14%;
 }
 .game-info {
-    margin-top: 20%;
-    height: 150px;
-    width: 350px;
-    transform: translateX(-100%);
+    width: 18%;
+    left: 5%;
+    top: 25%;
+    position: absolute;
     background-color: #2c3e50;
     border-radius: 10px;
     color: white;
-    font-size: 25px;
-    line-height: 50px;
+    font-size: 3vh;
+    text-align: center;
+    padding: 10px;
+    line-height: 40px;
+}
+.progress-bar {
+    border: 2px solid black;
+    border-radius: 6px;
+    position: absolute;
+    height: 100%;
+    right: 25%;
+    width: 0.8%;
+    background-color: white;
+}
+.progress-bar-completed {
+    background-color: gray;
+    text-align: center;
 }
 .user-link{
     color: white;
 }
 
 .chess-board{
-    margin-top: 5%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 100%;
+    aspect-ratio: 1/1;
     table-layout: fixed;
     background-color: white;
     border-collapse: collapse;
-    float: left;
-    transform: translateX(-15%);
 }
 
 .chess-board .cell {
-    height: 90px;
-    width: 90px;
+    height: 12.5%;
+    aspect-ratio: 1/1;
     box-sizing: border-box;
     text-align: center;
     vertical-align: middle;
@@ -114,7 +138,7 @@ body {
 .chess-board .cell-piece{
     height: 100%;
     width: 100%;
-    font-size: 40pt;
+    font-size: 5vh;
 }
 
 .profile-header{
@@ -171,4 +195,7 @@ body {
     height: 100%;
     width: 100%;
     font-size: 25px;
+}
+.moves-table{
+
 }

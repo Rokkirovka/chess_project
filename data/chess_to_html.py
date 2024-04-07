@@ -36,25 +36,29 @@ class ImprovedBoard(Board):
                 current = None
         return current
 
-    def get_board_for_json(self, selected=None):
+    def get_board_for_json(self, selected=None, move_number=-1):
+        board_copy = self.copy()
+        if move_number != -1:
+            for _ in range(len(board_copy.move_stack) - move_number):
+                board_copy.pop()
         json_board = []
         for i in range(64):
             cell = {
                 'name': square_name(i),
-                'piece': pieces[self.piece_at(i)],
+                'piece': pieces[board_copy.piece_at(i)],
                 'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
             }
-            if self.move_stack:
-                if self.move_stack[-1].uci()[2:] == square_name(i) or self.move_stack[-1].uci()[:2] == square_name(i):
+            if board_copy.move_stack:
+                if board_copy.move_stack[-1].uci()[2:] == square_name(i) or board_copy.move_stack[-1].uci()[:2] == square_name(i):
                     cell['color'] = colors['light-green']
-            if self.piece_at(i) == Piece.from_symbol('K') and self.turn and self.is_check():
+            if board_copy.piece_at(i) == Piece.from_symbol('K') and board_copy.turn and board_copy.is_check():
                 cell['color'] = colors['light-purple']
-            if self.piece_at(i) == Piece.from_symbol('k') and not self.turn and self.is_check():
+            if board_copy.piece_at(i) == Piece.from_symbol('k') and not board_copy.turn and board_copy.is_check():
                 cell['color'] = colors['light-purple']
             if selected is not None:
                 if selected == square_name(i):
                     cell['color'] = colors['dark-red']
-                elif self.is_legal(Move.from_uci(selected + square_name(i))):
+                elif board_copy.is_legal(Move.from_uci(selected + square_name(i))):
                     cell['color'] = colors['light-red']
             json_board.append(cell)
         json_board.append({'current': selected})

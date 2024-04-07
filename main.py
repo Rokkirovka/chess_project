@@ -6,6 +6,7 @@ from chess import Move, parse_square
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO
+from flask_restful import reqparse, abort, Api, Resource
 
 from data import db_session
 from data.chess_to_html import ImprovedBoard
@@ -16,6 +17,7 @@ from forms.user import RegisterForm, GameForm, LoginForm, GameEngineForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 socketio = SocketIO(app)
@@ -160,7 +162,7 @@ def play_engine_game(user_id):
                     db_sess.commit()
                     db_sess.close()
                     socketio.emit('update_board', board.get_board_for_json())
-                return jsonify(board.get_board_for_json(cur))
+                return jsonify(board.get_board_for_json(selected=cur))
             return jsonify(board.get_board_for_json())
         return jsonify(board.get_board_for_json())
     lst = board.get_board_for_json()
@@ -202,15 +204,11 @@ def play_game(game_id):
                 cur = board.make_move(request.args.get('move'))
                 update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
                 socketio.emit('update_board', board.get_board_for_json())
-                if (game.white_player == 1 and board.turn or game.black_player == 1 and
-                        not board.turn and not game.is_finished):
-                    board.push(engine_move(board.fen(), game.level))
-                update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
                 game.fen = board.fen()
                 game.moves = ' '.join(move.uci() for move in board.move_stack)
                 db_sess.commit()
                 db_sess.close()
-            return jsonify(board.get_board_for_json(cur))
+            return jsonify(board.get_board_for_json(selected=cur))
         return jsonify(board.get_board_for_json())
     lst = board.get_board_for_json()
     if current_user.is_authenticated:
@@ -226,6 +224,35 @@ def play_game(game_id):
     return render_template('game.html', board=lst, role=role,
                            white_player=white_player, black_player=black_player, end_game=game.is_finished,
                            result=game.result, reason=game.reason, turn=board.turn, type=game.type, url=request.url)
+
+
+@app.route('/analysis/<int:game_id>')
+def analysis(game_id):
+    db_sess = db_session.create_session()
+    game = db_sess.query(Game).get(game_id)
+    board = get_board_game(game)
+    white_player = db_sess.query(User).get(game.white_player)
+    black_player = db_sess.query(User).get(game.black_player)
+    if request.is_json:
+        move_number = int(request.args.get('move_number'))
+        board_copy = board.copy()
+        if move_number != -1:
+            for _ in range(len(board_copy.move_stack) - move_number):
+                board_copy.pop()
+        dct = board.get_board_for_json(move_number=move_number)
+        rate = engine_analysis(board_copy.fen())
+        dct.append(rate)
+        return jsonify(dct)
+    rate = engine_analysis(board.fen())
+    moves = [(board.move_stack[x * 2: x * 2 + 2]) for x in range((len(board.move_stack) + 1) // 2)]
+    return render_template('analysis.html',
+                           board=board.get_board_for_json(),
+                           white_player=white_player,
+                           black_player=black_player,
+                           reason=game.reason,
+                           result=game.result,
+                           moves=moves,
+                           rate=rate)
 
 
 @app.route('/profile/<int:user_id>')
@@ -355,11 +382,11 @@ def update_game(game, result, reason, is_finished, wr, br, white_player, black_p
     return
 
 
-
-
 def get_board_game(game):
-    board = ImprovedBoard(game.fen)
-    board.move_stack = [Move.from_uci(move) for move in game.moves.split()]
+    board = ImprovedBoard()
+    moves = game.moves.split()
+    for move in moves:
+        board.push(chess.Move.from_uci(move))
     return board
 
 
@@ -370,6 +397,23 @@ def engine_move(fen, level):
     result = engine.play(board, chess.engine.Limit(time=0.3))
     engine.quit()
     return result.move
+
+
+def engine_analysis(fen):
+    board = ImprovedBoard(fen)
+    engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
+    info = engine.analyse(board, chess.engine.Limit(time=0.1))
+    engine.quit()
+    score = info['score'].white()
+    if score.is_mate() is True:
+        if '-' in str(score):
+            rate = 100
+        else:
+            rate = 0
+    else:
+        print(score.score())
+        rate = round((3000 - score.score()) / 60, 2)
+    return rate
 
 
 if __name__ == '__main__':

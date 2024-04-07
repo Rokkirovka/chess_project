@@ -51,6 +51,20 @@ function cell_click(id) {
     }
 }
 
+function move_click(id) {
+    $.ajax({
+        url: '', type: 'get', contentType: 'application/json',
+        data: {move_number: id},
+        success: function(response){
+            document.getElementsByClassName('progress-bar-completed')[0].style.height = response[response.length - 1] + "%";
+            for (var cell in response.slice(0, -2)){
+                $('.chess-board [id=' + response[cell].name + '] .cell-piece').text(response[cell].piece);
+                $('.chess-board [id=' + response[cell].name + ']').css('background-color', response[cell].color);
+            };
+        }
+    })
+}
+
 
 function print_board(response){
     for (var cell in response.slice(0, -1)){
