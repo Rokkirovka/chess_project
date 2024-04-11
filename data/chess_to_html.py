@@ -29,7 +29,10 @@ class ImprovedBoard(Board):
             current = None
         elif self.color_at(parse_square(move[2:])) == self.turn:
             current = move[2:]
-        if move[:2] != move[2:]:
+        if move[:2] != move[2:] and 'null' not in move:
+            if (move[1] == '7' and move[3] == '8' and pieces[self.piece_at(parse_square(move[:2]))] == '♙'
+                    or move[1] == '2' and move[3] == '1' and pieces[self.piece_at(parse_square(move[:2]))] == '♟'):
+                move += 'q'
             push_move = Move.from_uci(move)
             if self.is_legal(push_move):
                 self.push(push_move)
@@ -49,7 +52,8 @@ class ImprovedBoard(Board):
                 'color': colors['light'] if (square_file(i) + square_rank(i)) % 2 else colors['dark']
             }
             if board_copy.move_stack:
-                if board_copy.move_stack[-1].uci()[2:] == square_name(i) or board_copy.move_stack[-1].uci()[:2] == square_name(i):
+                if board_copy.move_stack[-1].uci()[2:] == square_name(i) or board_copy.move_stack[-1].uci()[
+                                                                            :2] == square_name(i):
                     cell['color'] = colors['light-green']
             if board_copy.piece_at(i) == Piece.from_symbol('K') and board_copy.turn and board_copy.is_check():
                 cell['color'] = colors['light-purple']
@@ -58,8 +62,8 @@ class ImprovedBoard(Board):
             if selected is not None:
                 if selected == square_name(i):
                     cell['color'] = colors['dark-red']
-                elif board_copy.is_legal(Move.from_uci(selected + square_name(i))):
+                elif board_copy.is_legal(Move.from_uci(selected + square_name(i))) or board_copy.is_legal(
+                        Move.from_uci(selected + square_name(i) + 'q')):
                     cell['color'] = colors['light-red']
             json_board.append(cell)
-        json_board.append({'current': selected})
-        return json_board
+        return {'board': json_board, 'current': selected, 'board_fen': board_copy.fen()}

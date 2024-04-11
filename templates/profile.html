@@ -8,7 +8,7 @@
         <p class="statistic-item">Статистика</p>
         <p class="statistic-item">Дата регистрации: {{ user.registration_date.date() }} </p>
         <p class="statistic-item">Рейтинг: {{ user.rating }}</p>
-        <p class="statistic-item">Завершено игр: {{ all_games | length }}</p>
+        <p class="statistic-item">Завершенных игр: {{ all_games | length }}</p>
         <p class="statistic-item">Незавершенных игр: {{ unfinished_games | length }}</p>
         {% if all_games | length == 0 %}
         <p class="statistic-item">Процент побед: <span>0%</span> </p>
@@ -25,7 +25,7 @@
     <p class="games-heading">Незавершенные игры</p>
     <ul class="games">
     {% for id in unfinished_games %}
-        {% set board = unfinished_games[id][1] %}
+        {% set board = unfinished_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
             {% set style = "float: left;" %}
         {% else %}
@@ -58,7 +58,7 @@
     <p class="games-heading">Выигранные игры</p>
     <ul class="games">
     {% for id in win_games %}
-        {% set board = win_games[id][1] %}
+        {% set board = win_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
             {% set style = "float: left;" %}
         {% else %}
@@ -91,7 +91,7 @@
     <p class="games-heading">Игры вничью</p>
     <ul class="games">
     {% for id in draw_games %}
-        {% set board = draw_games[id][1] %}
+        {% set board = draw_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
             {% set style = "float: left;" %}
         {% else %}
@@ -124,7 +124,7 @@
     <p class="games-heading">Проигранные игры</p>
     <ul class="games">
     {% for id in loose_games %}
-        {% set board = loose_games[id][1] %}
+        {% set board = loose_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
             {% set style = "float: left;" %}
         {% else %}

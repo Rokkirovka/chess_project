@@ -4,17 +4,17 @@
 
 {% if (white_player is none or black_player is none) and type != 'engine' %}
     {% if not current_user.is_authenticated %}
-        Незарегистрированный пользователь не может принять игру
+        <div class="message">Незарегистрированный пользователь не может принять игру.</div>
     {% else %}
         {% if type == 'fast' %}
-            Подождите, пока мы подберем вам соперника
+            <div class="message">Подождите, пока мы подберем вам соперника...</div>
         {% else %}
-            Отправьте эту ссылку вашему сопернику: {{ url }} Первый, кто пройдет по ней, сыграет с вами.
+            <div class="message">Отправьте эту ссылку вашему сопернику: {{ url }}. Первый, кто пройдет по ней, сыграет с вами. </div>
         {% endif %}
     {% endif %}
 {% else %}
     {% if role == 'black' %}
-        {% set board = board[:-1][::-1] %}
+        {% set board = board[::-1] %}
     {% endif %}
 
 <div class="party">
@@ -47,10 +47,10 @@
                     {% set name = cell['name'] %}
                     <td class="cell"
                             draggable="true"
-                            ondragstart="cell_start_drag(this.id)"
+                            ondragstart="cell_start_drag(this.id, event)"
                             ondragover="cell_drag_over(event)"
-                            ondrop="cell_drop(this.id)"
-                            onclick="cell_click(this.id)"
+                            ondrop="cell_drop(this.id, event)"
+                            onclick="cell_click(this.id, event)"
                             style="background-color: {{ color }};"
                             id="{{ name }}">
                         <span class="cell-piece">{{ piece }}</span>

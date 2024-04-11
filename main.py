@@ -38,7 +38,7 @@ def home():
 @login_required
 def new_game():
     db_sess = db_session.create_session()
-    user = db_sess.query(User).get(current_user.id)
+    user = db_sess.get(User, current_user.id)
     game = Game()
     color = choice(['1', '2'])
     if color == '1':
@@ -60,7 +60,7 @@ def new_game():
 @login_required
 def fast_game():
     db_sess = db_session.create_session()
-    user = db_sess.query(User).get(current_user.id)
+    user = db_sess.get(User, current_user.id)
     game = db_sess.query(Game).filter(
         ((Game.black_player == int(user.id)) | (Game.white_player == int(user.id))) & (Game.type == 'fast')).filter(
         (Game.black_player == None) | (Game.white_player == None)).first()
@@ -133,7 +133,7 @@ def play_engine_game(user_id):
     if not game:
         return redirect('/create_engine_game')
     board = get_board_game(game)
-    player = db_sess.query(User).get(game.player)
+    player = db_sess.get(User, game.player)
     color = game.color
     if color == 'white':
         white_player = player
@@ -155,7 +155,9 @@ def play_engine_game(user_id):
                     update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
                     socketio.emit('update_board', board.get_board_for_json())
                     if color == 'white' and not board.turn or color == 'black' and board.turn and not game.is_finished:
-                        board.push(engine_move(board.fen(), game.level))
+                        en_move = engine_move(board.fen(), game.level)
+                        if en_move is not None:
+                            board.push(en_move)
                     update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
                     game.fen = board.fen()
                     game.moves = ' '.join(move.uci() for move in board.move_stack)
@@ -165,7 +167,7 @@ def play_engine_game(user_id):
                 return jsonify(board.get_board_for_json(selected=cur))
             return jsonify(board.get_board_for_json())
         return jsonify(board.get_board_for_json())
-    lst = board.get_board_for_json()
+    lst = board.get_board_for_json()['board']
     if current_user.id == user_id:
         role = color
     else:
@@ -180,7 +182,7 @@ def play_engine_game(user_id):
 def play_game(game_id):
     db_sess = db_session.create_session()
 
-    game = db_sess.query(Game).get(game_id)
+    game = db_sess.get(Game, game_id)
     if current_user.is_authenticated:
         if game.white_player is None and game.black_player != current_user.id or game.black_player is None and game.white_player != current_user.id:
             if game.white_player is None:
@@ -190,8 +192,8 @@ def play_game(game_id):
             db_sess.commit()
             socketio.emit('reload')
     board = get_board_game(game)
-    white_player = db_sess.query(User).get(game.white_player)
-    black_player = db_sess.query(User).get(game.black_player)
+    white_player = db_sess.get(User, game.white_player)
+    black_player = db_sess.get(User, game.black_player)
     if request.is_json:
         if current_user == white_player and board.turn or current_user == black_player and not board.turn:
             if request.args.get('type') == 'cell':
@@ -210,7 +212,7 @@ def play_game(game_id):
                 db_sess.close()
             return jsonify(board.get_board_for_json(selected=cur))
         return jsonify(board.get_board_for_json())
-    lst = board.get_board_for_json()
+    lst = board.get_board_for_json()['board']
     if current_user.is_authenticated:
         if current_user.id == game.white_player:
             role = 'white'
@@ -227,12 +229,12 @@ def play_game(game_id):
 
 
 @app.route('/analysis/<int:game_id>')
-def analysis(game_id):
+def analysis_game(game_id):
     db_sess = db_session.create_session()
-    game = db_sess.query(Game).get(game_id)
+    game = db_sess.get(Game, game_id)
     board = get_board_game(game)
-    white_player = db_sess.query(User).get(game.white_player)
-    black_player = db_sess.query(User).get(game.black_player)
+    white_player = db_sess.get(User, game.white_player)
+    black_player = db_sess.get(User, game.black_player)
     if request.is_json:
         move_number = int(request.args.get('move_number'))
         board_copy = board.copy()
@@ -240,18 +242,49 @@ def analysis(game_id):
             for _ in range(len(board_copy.move_stack) - move_number):
                 board_copy.pop()
         dct = board.get_board_for_json(move_number=move_number)
-        rate = engine_analysis(board_copy.fen())
-        dct.append(rate)
+        rate, score = engine_analysis(board_copy.fen())
+        dct['rate'] = rate
+        dct['score'] = str(score)
+        db_sess.close()
         return jsonify(dct)
-    rate = engine_analysis(board.fen())
+    rate, score = engine_analysis(board.fen())
     moves = [(board.move_stack[x * 2: x * 2 + 2]) for x in range((len(board.move_stack) + 1) // 2)]
-    return render_template('analysis.html',
-                           board=board.get_board_for_json(),
+    db_sess.close()
+    return render_template('analysis_game.html',
+                           board=board.get_board_for_json()['board'],
                            white_player=white_player,
                            black_player=black_player,
                            reason=game.reason,
                            result=game.result,
                            moves=moves,
+                           score=score,
+                           rate=str(rate))
+
+
+@app.route('/analysis/')
+def analysis_position():
+    board = ImprovedBoard()
+    if request.is_json:
+        if request.args.get('board_fen'):
+            board = ImprovedBoard(request.args.get('board_fen'))
+        if request.args.get('type') == 'cell':
+            cell = request.args.get('cell')
+            if board.color_at(parse_square(cell)) == board.turn:
+                cur = cell
+            else:
+                cur = None
+            dct = board.get_board_for_json(selected=cur)
+        else:
+            cur = board.make_move(request.args.get('move'))
+            rate, score = engine_analysis(board.fen())
+            dct = board.get_board_for_json(selected=cur)
+            dct['rate'] = rate
+            dct['score'] = str(score)
+        return jsonify(dct)
+    rate, score = engine_analysis(board.fen())
+    return render_template('analysis_position.html',
+                           board=board.get_board_for_json()['board'],
+                           score=score,
                            rate=rate)
 
 
@@ -261,20 +294,21 @@ def profile(user_id):
     user = db_sess.query(User).get(user_id)
     all_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
                                             (Game.white_player == int(user.id))) & (Game.is_finished == 1)).all()
-    all_games = {x.id: [x, get_board_game(x).get_board()] for x in all_games}
+    all_games = {x.id: [x, get_board_game(x).get_board_for_json()] for x in all_games}
     win_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'Black win')) |
                                            ((Game.white_player == int(user.id)) & (Game.result == 'White win'))).all()
-    win_games = {x.id: [x, get_board_game(x).get_board()] for x in win_games}
+    win_games = {x.id: [x, get_board_game(x).get_board_for_json()] for x in win_games}
     draw_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
                                              (Game.white_player == int(user.id))) & (Game.result == 'Draw')).all()
-    draw_games = {x.id: [x, get_board_game(x).get_board()] for x in draw_games}
+    draw_games = {x.id: [x, get_board_game(x).get_board_for_json()] for x in draw_games}
     loose_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) & (Game.result == 'White win')) |
                                              ((Game.white_player == int(user.id)) & (Game.result == 'Black win'))).all()
-    loose_games = {x.id: [x, get_board_game(x).get_board()] for x in loose_games}
+    loose_games = {x.id: [x, get_board_game(x).get_board_for_json()] for x in loose_games}
     unfinished_games = db_sess.query(Game).filter(((Game.black_player == int(user.id)) |
                                                    (Game.white_player == int(user.id))) & (Game.is_finished == 0)).all()
-    unfinished_games = {x.id: [x, get_board_game(x).get_board()] for x in unfinished_games}
-
+    unfinished_games = {x.id: [x, get_board_game(x).get_board_for_json()] for x in unfinished_games}
+    db_sess.close()
+    print(unfinished_games)
     return render_template('profile.html', user=user,
                            all_games=all_games,
                            win_games=win_games,
@@ -295,6 +329,7 @@ def register():
         db_sess = db_session.create_session()
         if db_sess.query(User).filter((User.email == str(form.email.data)) |
                                       (User.nick == str(form.nick.data))).first():
+            db_sess.close()
             return render_template('register.html',
                                    title='Регистрация',
                                    form=form,
@@ -333,7 +368,7 @@ def login():
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
-    user = db_sess.query(User).get(user_id)
+    user = db_sess.get(User, user_id)
     db_sess.close()
     return user
 
@@ -399,10 +434,10 @@ def engine_move(fen, level):
     return result.move
 
 
-def engine_analysis(fen):
+def engine_analysis(fen, time=0.1):
     board = ImprovedBoard(fen)
     engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
-    info = engine.analyse(board, chess.engine.Limit(time=0.1))
+    info = engine.analyse(board, chess.engine.Limit(time=time))
     engine.quit()
     score = info['score'].white()
     if score.is_mate() is True:
@@ -411,9 +446,8 @@ def engine_analysis(fen):
         else:
             rate = 0
     else:
-        print(score.score())
         rate = round((3000 - score.score()) / 60, 2)
-    return rate
+    return rate, score
 
 
 if __name__ == '__main__':
