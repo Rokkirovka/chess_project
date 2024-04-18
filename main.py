@@ -7,12 +7,15 @@ from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO
 from flask_restful import reqparse, abort, Api, Resource
+from data import chess_resources
+from data.engine import engine_analysis, engine_move
 
 from data import db_session
 from data.chess_to_html import ImprovedBoard
 from data.games import Game, EngineGame
 from data.rating_calculator import rating_calculation
 from data.users import User
+from data.analyzes import Analysis
 from forms.user import RegisterForm, GameForm, LoginForm, GameEngineForm
 
 app = Flask(__name__)
@@ -21,6 +24,7 @@ api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 socketio = SocketIO(app)
+api.add_resource(chess_resources.AnalysisResource, '/api/analysis', endpoint='analysis')
 
 
 def main():
@@ -308,7 +312,6 @@ def profile(user_id):
                                                    (Game.white_player == int(user.id))) & (Game.is_finished == 0)).all()
     unfinished_games = {x.id: [x, get_board_game(x).get_board_for_json()] for x in unfinished_games}
     db_sess.close()
-    print(unfinished_games)
     return render_template('profile.html', user=user,
                            all_games=all_games,
                            win_games=win_games,
@@ -423,31 +426,6 @@ def get_board_game(game):
     for move in moves:
         board.push(chess.Move.from_uci(move))
     return board
-
-
-def engine_move(fen, level):
-    board = ImprovedBoard(fen)
-    engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
-    engine.configure({"Skill Level": level})
-    result = engine.play(board, chess.engine.Limit(time=0.3))
-    engine.quit()
-    return result.move
-
-
-def engine_analysis(fen, time=0.1):
-    board = ImprovedBoard(fen)
-    engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
-    info = engine.analyse(board, chess.engine.Limit(time=time))
-    engine.quit()
-    score = info['score'].white()
-    if score.is_mate() is True:
-        if '-' in str(score):
-            rate = 100
-        else:
-            rate = 0
-    else:
-        rate = round((3000 - score.score()) / 60, 2)
-    return rate, score
 
 
 if __name__ == '__main__':

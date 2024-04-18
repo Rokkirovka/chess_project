@@ -23,6 +23,7 @@ def global_init(db_file):
 
     from . import users
     from . import games
+    from . import analyzes
 
     SqlAlchemyBase.metadata.create_all(engine)
 
