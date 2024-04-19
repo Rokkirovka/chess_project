@@ -15,7 +15,6 @@ from data.chess_to_html import ImprovedBoard
 from data.games import Game, EngineGame
 from data.rating_calculator import rating_calculation
 from data.users import User
-from data.analyzes import Analysis
 from forms.user import RegisterForm, GameForm, LoginForm, GameEngineForm
 
 app = Flask(__name__)
@@ -25,6 +24,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 socketio = SocketIO(app)
 api.add_resource(chess_resources.AnalysisResource, '/api/analysis', endpoint='analysis')
+api.add_resource(chess_resources.UserResource, '/api/user/<int:user_id>')
+api.add_resource(chess_resources.UserListResource, '/api/users')
+api.add_resource(chess_resources.GameResource, '/api/game/<int:game_id>')
+api.add_resource(chess_resources.GameListResource, '/api/games')
 
 
 def main():
