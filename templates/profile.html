@@ -2,9 +2,9 @@
 
 {% block content %}
 
-<h1 class="user">{{ user.nick }}</h1>
 <div class="statistic">
     <div class="statistic-items">
+        <p class="statistic-item">{{ user.nick }}</p>
         <p class="statistic-item">Статистика</p>
         <p class="statistic-item">Дата регистрации: {{ user.registration_date.date() }} </p>
         <p class="statistic-item">Рейтинг: {{ user.rating }}</p>
