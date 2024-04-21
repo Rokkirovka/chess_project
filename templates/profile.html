@@ -23,7 +23,7 @@
 </div>
 {% if unfinished_games %}
     <p class="games-heading">Незавершенные игры</p>
-    <ul class="games">
+    <div class="unfinished_games">
     {% for id in unfinished_games %}
         {% set board = unfinished_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
@@ -31,7 +31,7 @@
         {% else %}
             {% set style = ";" %}
         {% endif %}
-        <li style="{{ style }}">
+        <a class="game-link" href="../game/{{ id }}">
             <table class="chess-board-mini">
                 <tbody>
                     {% for row in range(7, -1, -1) %}
@@ -49,14 +49,14 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </li>
+        </a>
     {% endfor %}
-    </ul>
+    </div>
 {% endif %}
 
 {% if win_games %}
     <p class="games-heading">Выигранные игры</p>
-    <ul class="games">
+    <div class="win_games">
     {% for id in win_games %}
         {% set board = win_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
@@ -64,7 +64,7 @@
         {% else %}
             {% set style = ";" %}
         {% endif %}
-        <li style="{{ style }}">
+        <a class="game-link" href="../game/{{ id }}">
             <table class="chess-board-mini">
                 <tbody>
                     {% for row in range(7, -1, -1) %}
@@ -82,14 +82,14 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </li>
+        </a>
     {% endfor %}
-    </ul>
+    </div>
 {% endif %}
 
 {% if draw_games %}
     <p class="games-heading">Игры вничью</p>
-    <ul class="games">
+    <div class="draw_games">
     {% for id in draw_games %}
         {% set board = draw_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
@@ -97,7 +97,7 @@
         {% else %}
             {% set style = ";" %}
         {% endif %}
-        <li style="{{ style }}">
+        <a class="game-link" href="../game/{{ id }}">
             <table class="chess-board-mini">
                 <tbody>
                     {% for row in range(7, -1, -1) %}
@@ -115,14 +115,14 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </li>
+        </a>
     {% endfor %}
-    </ul>
+    </div>
 {% endif %}
 
 {% if loose_games %}
     <p class="games-heading">Проигранные игры</p>
-    <ul class="games">
+    <div class="loose_games">
     {% for id in loose_games %}
         {% set board = loose_games[id][1]['board'] %}
         {% if loop.index % 5 != 0 %}
@@ -130,7 +130,7 @@
         {% else %}
             {% set style = ";" %}
         {% endif %}
-        <li style="{{ style }}">
+        <a class="game-link" href="../game/{{ id }}">
             <table class="chess-board-mini">
                 <tbody>
                     {% for row in range(7, -1, -1) %}
@@ -148,9 +148,9 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </li>
+        </a>
     {% endfor %}
-    </ul>
+    </div>
 {% endif %}
 
 {% endblock %}

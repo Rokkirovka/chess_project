@@ -1,10 +1,12 @@
-from flask_restful import reqparse, abort, Api, Resource
+import chess.svg
+from flask import jsonify
+from flask_restful import reqparse, Resource
+
 from data import db_session
 from data.analyzes import Analysis
-from data.users import User
-from data.games import Game
-from flask import jsonify
 from data.engine import engine_analysis
+from data.games import Game
+from data.users import User
 
 
 class AnalysisResource(Resource):

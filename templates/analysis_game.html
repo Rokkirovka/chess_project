@@ -7,6 +7,7 @@
         <div class="end">{{ result }} • {{ reason }}</div>
         <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> {{ white_player.rating }}</div>
         <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+        <div style="overflow-y: scroll; height: 10vh;">
         <table class="moves-table">
             <tbody class="moves-table-body">
                 {% for move in moves %}
@@ -24,6 +25,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     </div>
     <div class="score">
         <div class="rate">{{ score }}</div>

@@ -216,8 +216,12 @@ def play_game(game_id):
                 game.fen = board.fen()
                 game.moves = ' '.join(move.uci() for move in board.move_stack)
                 db_sess.commit()
-                db_sess.close()
-            return jsonify(board.get_board_for_json(selected=cur))
+            dct = board.get_board_for_json(selected=cur)
+            dct['is_finished'] = game.is_finished
+            dct['reason'] = game.reason
+            dct['result'] = game.result
+            db_sess.close()
+            return jsonify(dct)
         return jsonify(board.get_board_for_json())
     lst = board.get_board_for_json()['board']
     if current_user.is_authenticated:
@@ -232,7 +236,7 @@ def play_game(game_id):
     db_sess.close()
     return render_template('game.html', board=lst, role=role,
                            white_player=white_player, black_player=black_player, end_game=game.is_finished,
-                           result=game.result, reason=game.reason, turn=board.turn, type=game.type, url=request.url)
+                           result=game.result, reason=game.reason, turn=board.turn, type=game.type, url=request.url, id=game.id)
 
 
 @app.route('/analysis/<int:game_id>')

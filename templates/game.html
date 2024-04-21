@@ -35,6 +35,11 @@
             <div>Черные: Stockfish</div>
         {% endif %}
         <div>{{ type|capitalize }}</div>
+        {% if end_game %}
+            <div class="analysis"><a href="../analysis/{{ id }}" class="analysis-link">Анализировать партию</a></div>
+        {% else %}
+            <div class="analysis"><a href="../analysis/{{ id }}" class="analysis-link"></a></div>
+        {% endif %}
     </div>
 <table class="chess-board">
     <tbody>

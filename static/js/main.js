@@ -33,7 +33,7 @@ function cell_drop(id, event) {
         let move = window.cell + id;
         $.ajax({
             url: '', type: 'get', contentType: 'application/json',
-            data: {type: 'move', move: move, board_fen: window.board_fen}
+            data: {type: 'move', move: move, board_fen: window.board_fen}, success: print_board
         })
     }
 }
@@ -70,6 +70,10 @@ function print_board(response){
     if ('rate' in response && 'score' in response){
         document.getElementsByClassName('progres-bar-completed')[0].style.height = response.rate + "%";
         $('.rate').text(response.score)
+    }
+    if ('is_finished' in response && response.is_finished == true){
+        $('.end').text(response.result + ' • ' + response.reason)
+        $('.analysis-link').text('Анализировать партию')
     }
     for (var cell in response.board){
         $('.chess-board [id=' + response.board[cell].name + '] .cell-piece').text(response.board[cell].piece);

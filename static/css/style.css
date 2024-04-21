@@ -126,6 +126,9 @@ body {
 .user-link{
     color: white;
 }
+.analysis-link{
+    color: white;
+}
 
 .chess-board{
     user-select: none;
@@ -183,6 +186,7 @@ body {
     color: #2c3e50;
 }
 .games-heading {
+    text-align: center;
     color: #2c3e50;
     font-size: 35px;
 }
@@ -196,21 +200,23 @@ body {
     user-select: none;
     table-layout: fixed;
     border-collapse: collapse;
-    padding: 25px 25px;
-    display: block;
+    display: inline-block;
+    padding-left: 3%;
+    padding-top: 3%;
 }
 .chess-board-mini .cell {
-    height: 40px;
-    width: 40px;
+    height: 2vw;
+    width: 2vw;
     box-sizing: border-box;
+    text-align: center;
 }
 .chess-board-mini .cell-piece{
     height: 100%;
     width: 100%;
-    font-size: 25px;
+    font-size: 1.5vw;
 }
 .moves-table{
-
+    margin: auto;
 }
 .message {
     position: absolute;
@@ -218,4 +224,14 @@ body {
     font-size: 4vw;
     width: 100%;
     text-align: center;
+}
+.game-link{
+    text-decoration: none;
+    color: black;
+}
+.move{
+    cursor: pointer;
+}
+.move:hover{
+    background-color: #ccc;
 }
