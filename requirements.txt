@@ -8,3 +8,4 @@ flask_login
 sqlalchemy_serializer
 sqlalchemy
 wtforms
+flask_wtf
