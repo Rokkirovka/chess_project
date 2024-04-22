@@ -3,10 +3,10 @@ from random import choice
 
 import chess.engine
 from chess import Move, parse_square
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, session
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
-from flask_socketio import SocketIO
-from flask_restful import reqparse, abort, Api, Resource
+from flask_socketio import SocketIO, emit
+from flask_restful import Api
 from data import chess_resources
 from data.engine import engine_analysis, engine_move
 
@@ -160,7 +160,9 @@ def play_engine_game(user_id):
                 else:
                     cur = board.make_move(request.args.get('move'))
                     update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
-                    socketio.emit('update_board', board.get_board_for_json())
+                    args = board.get_board_for_json()
+                    args['path'] = request.path
+                    socketio.emit('update_board', args)
                     if color == 'white' and not board.turn or color == 'black' and board.turn and not game.is_finished:
                         en_move = engine_move(board.fen(), game.level)
                         if en_move is not None:
@@ -170,7 +172,9 @@ def play_engine_game(user_id):
                     game.moves = ' '.join(move.uci() for move in board.move_stack)
                     db_sess.commit()
                     db_sess.close()
-                    socketio.emit('update_board', board.get_board_for_json())
+                    args = board.get_board_for_json()
+                    args['path'] = request.path
+                    socketio.emit('update_board', args)
                 return jsonify(board.get_board_for_json(selected=cur))
             return jsonify(board.get_board_for_json())
         return jsonify(board.get_board_for_json())
@@ -212,7 +216,9 @@ def play_game(game_id):
             else:
                 cur = board.make_move(request.args.get('move'))
                 update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
-                socketio.emit('update_board', board.get_board_for_json())
+                args = board.get_board_for_json()
+                args['path'] = request.path
+                socketio.emit('update_board', args)
                 game.fen = board.fen()
                 game.moves = ' '.join(move.uci() for move in board.move_stack)
                 db_sess.commit()

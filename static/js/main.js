@@ -4,10 +4,12 @@ window.cell = null;
 window.board_fen = null;
 
 socket.on('update_board', (response) => {
-    if (response.end_game == true){
-        $('.end').text(response.result + ' • ' + response.reason)
+    if (response.path == window.location.pathname){
+        if (response.end_game == true){
+            $('.end').text(response.result + ' • ' + response.reason)
+        }
+        print_board(response)
     }
-    print_board(response)
 });
 
 socket.on('reload', function() {

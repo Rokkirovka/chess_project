@@ -7,3 +7,4 @@ werkzeug
 flask_login
 sqlalchemy_serializer
 sqlalchemy
+wtforms

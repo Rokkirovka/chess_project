@@ -14,13 +14,13 @@ def engine_move(fen, level):
     return result.move
 
 
-def engine_analysis(fen, time=0.1):
+def engine_analysis(fen, time=0.1, depth=5):
     db_sess = db_session.create_session()
     analysis = db_sess.query(Analysis).filter(Analysis.fen == str(fen)).first()
     if not analysis:
         board = ImprovedBoard(fen)
         engine = chess.engine.SimpleEngine.popen_uci("data/stockfish/stockfish-windows-x86-64-avx2.exe")
-        info = engine.analyse(board, chess.engine.Limit(time=time))
+        info = engine.analyse(board, chess.engine.Limit(time=time, depth=depth))
         engine.quit()
         analysis = Analysis()
         analysis.fen = fen
