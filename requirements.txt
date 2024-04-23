@@ -9,5 +9,4 @@ sqlalchemy_serializer
 sqlalchemy
 wtforms
 flask_wtf
-python-dotenv
 passlib
