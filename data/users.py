@@ -1,5 +1,5 @@
 import sqlalchemy
-from passlib.hash import hex_md5
+from hashlib import md5
 from .db_session import SqlAlchemyBase
 from flask_login import UserMixin
 from sqlalchemy_serializer import SerializerMixin
@@ -15,7 +15,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     registration_date = sqlalchemy.Column(sqlalchemy.DateTime)
 
     def set_password(self, password):
-        self.hashed_password = hex_md5.hash(password)
+        self.hashed_password = md5(password.encode()).hexdigest()
 
     def check_password(self, password):
-        return self.hashed_password == hex_md5.hash(password)
+        return self.hashed_password == md5(password.encode()).hexdigest()
