@@ -32,7 +32,7 @@ api.add_resource(chess_resources.GameListResource, '/api/games')
 
 def main():
     db_session.global_init('db/chess.db')
-    app.run(host='0.0.0.0', port=3000)
+    app.run(host='0.0.0.0', port=5000)
 
 
 @app.route('/')
