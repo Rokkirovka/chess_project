@@ -24,10 +24,12 @@ body {
     float: left;
 }
 .menu-item {
+    position: relative;
     display: block;
     color: white;
     text-align: center;
-    padding: 10% 25px;
+    top: 1.5vh;
+    padding: 0 20px;
     text-decoration: none;
 }
 

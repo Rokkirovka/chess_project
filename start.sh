@@ -20,7 +20,6 @@ fi
 
 # Install the requirements
 $VIRTUALENV/bin/pip install -r requirements.txt
-npm install hashlib
 
 # Run your glorious application
 $VIRTUALENV/bin/python3 server.py
