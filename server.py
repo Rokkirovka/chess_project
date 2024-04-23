@@ -388,7 +388,6 @@ def search():
         nick = request.form['nick'].lower()
         users = db_sess.query(User).filter(User.nick.like(f'%{nick}%')).all()
         db_sess.close()
-        print(users)
         return render_template('search.html', users=users)
     return render_template('search.html', users=[])
 
