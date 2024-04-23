@@ -9,4 +9,3 @@ sqlalchemy_serializer
 sqlalchemy
 wtforms
 flask_wtf
-passlib
