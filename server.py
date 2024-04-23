@@ -218,6 +218,7 @@ def play_game(game_id):
                 update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
                 args = board.get_board_for_json()
                 args['path'] = request.path
+                args['is_finished'] = game.is_finished
                 socketio.emit('update_board', args)
                 game.fen = board.fen()
                 game.moves = ' '.join(move.uci() for move in board.move_stack)
