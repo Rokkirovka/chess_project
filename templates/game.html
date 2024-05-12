@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script>var role = '{{role}}'; var id = {{id}}; var fen = '{{game.fen}}'</script>
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
 
 {% if (white_player is none or black_player is none) and type != 'engine' %}
     {% if not current_user.is_authenticated %}
@@ -41,30 +43,10 @@
             <div class="analysis"><a href="../analysis/{{ id }}" class="analysis-link"></a></div>
         {% endif %}
     </div>
-<table class="chess-board">
-    <tbody>
-        {% for row in range(7, -1, -1) %}
-            <tr>
-                {% for col in range(8) %}
-                    {% set cell = board[row * 8 + col] %}
-                    {% set color = cell['color'] %}
-                    {% set piece = cell['piece'] %}
-                    {% set name = cell['name'] %}
-                    <td class="cell"
-                            draggable="true"
-                            ondragstart="cell_start_drag(this.id, event)"
-                            ondragover="cell_drag_over(event)"
-                            ondrop="cell_drop(this.id, event)"
-                            onclick="cell_click(this.id, event)"
-                            style="background-color: {{ color }};"
-                            id="{{ name }}">
-                        <span class="cell-piece">{{ piece }}</span>
-                    </td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+<div class="chess-board">
+    <div id="chessboard"></div>
+</div>
 <br>
 </div>
 {% endif %}

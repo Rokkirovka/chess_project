@@ -2,7 +2,7 @@ import datetime
 from random import choice
 
 import chess.engine
-from chess import Move, parse_square
+from chess import Move, parse_square, Board
 from flask import Flask, render_template, request, redirect, jsonify, session
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO, emit
@@ -76,7 +76,6 @@ def fast_game():
             ((Game.black_player == None) | (Game.white_player == None)) & (Game.type == 'fast')).all()
         if games:
             game = choice(games)
-            print(game.white_player, game.black_player)
             if game.white_player is None:
                 game.white_player = user.id
             else:
@@ -180,13 +179,13 @@ def play_engine_game(user_id):
         return jsonify(board.get_board_for_json())
     lst = board.get_board_for_json()['board']
     if current_user.id == user_id:
-        role = color
+        role = color[0]
     else:
-        role = 'spectator'
+        role = 's'
     db_sess.close()
-    return render_template('game.html', board=lst, role=role,
+    return render_template('game.html', board=lst, role=role, game=game,
                            white_player=white_player, black_player=black_player, end_game=game.is_finished,
-                           result=game.result, reason=game.reason, turn=board.turn, type='engine', url=request.url)
+                           result=game.result, reason=game.reason, turn=board.turn, type='engine', url=request.url, id=game.id)
 
 
 @app.route('/game/<int:game_id>')
@@ -233,17 +232,29 @@ def play_game(game_id):
     lst = board.get_board_for_json()['board']
     if current_user.is_authenticated:
         if current_user.id == game.white_player:
-            role = 'white'
+            role = 'w'
         elif current_user.id == game.black_player:
-            role = 'black'
+            role = 'b'
         else:
-            role = 'spectator'
+            role = 's'
     else:
         role = 'spectator'
     db_sess.close()
-    return render_template('game.html', board=lst, role=role,
+    return render_template('game.html', board=lst, role=role, game=game,
                            white_player=white_player, black_player=black_player, end_game=game.is_finished,
                            result=game.result, reason=game.reason, turn=board.turn, type=game.type, url=request.url, id=game.id)
+
+
+@socketio.event
+def move(data):
+    db_sess = db_session.create_session()
+    game = db_sess.get(Game, data['id'])
+    board = Board(game.fen)
+    board.push(Move.from_uci(data['from'] + data['to']))
+    game.fen = board.fen()
+    db_sess.commit()
+    socketio.emit('move', data)
+    db_sess.close()
 
 
 @app.route('/analysis/<int:game_id>')

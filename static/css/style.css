@@ -133,29 +133,11 @@ body {
 }
 
 .chess-board{
-    user-select: none;
-    left: 0;
-    right: 0;
+}
+
+#chessboard{
     margin: auto;
-    height: 100%;
-    aspect-ratio: 1/1;
-    table-layout: fixed;
-    background-color: white;
-    border-collapse: collapse;
-}
-
-.chess-board .cell {
-    height: 12.5%;
-    width: 12.5%;
-    box-sizing: border-box;
-    text-align: center;
-    vertical-align: middle;
-}
-
-.chess-board .cell-piece{
-    height: 100%;
-    width: 100%;
-    font-size: 5vh;
+    width: 78vh;
 }
 
 .profile-header{
@@ -251,4 +233,18 @@ body {
     position: absolute;
     text-align: center;
     top: 15%;
+}
+
+.white-1e1d7 {
+  background-color: #e9eef2;
+  color: #8ca2ad;
+}
+
+.black-3c85d {
+  background-color: #8ca2ad;
+  color: #e9eef2;
+}
+
+.highlight1-32417, .highlight2-9c5d2 {
+  box-shadow: inset 0 0 3px 3px #93b266;
 }
