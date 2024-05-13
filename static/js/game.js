@@ -15,18 +15,13 @@ let config = {
   snapbackSpeed: 200,
   snapSpeed: 50,
   pieceTheme: '../static/img/chesspieces/wikipedia/{piece}.png',
-  showErrors: 'console',
+  showErrors: console,
   onDrop: onDrop,
   onSnapEnd: onSnapEnd,
   onDragStart: onDragStart,
   onMouseoutSquare: onMouseoutSquare,
   onMouseoverSquare: onMouseoverSquare,
 }
-
-$(document).ready(function(){
-    game = new Chess(fen);
-    board = Chessboard('chessboard', config);
-})
 
 function onDragStart (source, piece, position, orientation) {
   if (game.isGameOver()) return false
@@ -35,17 +30,6 @@ function onDragStart (source, piece, position, orientation) {
       (game.turn() === 'b' && ((piece.search(/^w/) !== -1) || role !== 'b'))) {
     return false
   }
-}
-
-function onDrop(source, target){
-    removeGreySquares()
-
-    if (moveIn(game.moves({square: source, verbose: true}), target)){
-        socket.emit('move', {from: source, to: target, id: id})
-    }
-    else {
-        return 'snapback'
-    }
 }
 
 function onSnapEnd () {

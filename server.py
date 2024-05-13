@@ -2,8 +2,8 @@ import datetime
 from random import choice
 
 import chess.engine
-from chess import Move, parse_square, Board
-from flask import Flask, render_template, request, redirect, jsonify, session
+from chess import Move, parse_square, Board, square_name
+from flask import Flask, render_template, request, redirect, jsonify, url_for
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO, emit
 from flask_restful import Api
@@ -32,7 +32,7 @@ api.add_resource(chess_resources.GameListResource, '/api/games')
 
 def main():
     db_session.global_init('db/chess.db')
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=80, debug=True)
 
 
 @app.route('/')
@@ -100,136 +100,41 @@ def fast_game():
     return redirect('/game/' + game_id)
 
 
-@app.route('/create_engine_game', methods=['GET', 'POST'])
+@app.route('/engine_game', methods=['GET', 'POST'])
 @login_required
 def new_engine_game():
+    if request.is_json:
+        data = request.args
+        move = engine_move(data['fen'], data['level'])
+        return jsonify({'from': square_name(move.from_square), 'to': square_name(move.to_square)})
     form = GameEngineForm()
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        old_game = db_sess.query(EngineGame).filter(EngineGame.player == int(current_user.id)).first()
-        if old_game:
-            db_sess.delete(old_game)
-        game = EngineGame()
         if form.color.data == '3':
-            color = choice(['white', 'black'])
+            color = choice(['w', 'b'])
         else:
-            color = form.color.data
+            color = 'w' if form.color.data == '1' else 'b'
         board = ImprovedBoard()
-        game.level = form.level.data
-        if color == 'black':
-            board.push(engine_move(board.fen(), game.level))
-        db_sess.add(game)
-        game.fen = board.fen()
-        game.is_finished = False
-        game.moves = ' '.join(move.uci() for move in board.move_stack)
-        game.color = color
-        game.player = current_user.id
-        db_sess.commit()
-        db_sess.close()
-        return redirect(f'/engine_game/{current_user.id}')
+        if color == 'b':
+            board.push(engine_move(board.fen(), form.level.data))
+        return render_template('engine_game.html', level=form.level.data, role=color)
     return render_template('create_engine_game.html', form=form)
-
-
-@app.route('/engine_game/<int:user_id>')
-@login_required
-def play_engine_game(user_id):
-    db_sess = db_session.create_session()
-
-    game = db_sess.query(EngineGame).filter(EngineGame.player == int(user_id)).first()
-    if not game:
-        return redirect('/create_engine_game')
-    board = get_board_game(game)
-    player = db_sess.get(User, game.player)
-    color = game.color
-    if color == 'white':
-        white_player = player
-        black_player = None
-    else:
-        white_player = None
-        black_player = player
-    if request.is_json:
-        if current_user.id == user_id:
-            if color == 'white' and board.turn or color == 'black' and not board.turn:
-                if request.args.get('type') == 'cell':
-                    cell = request.args.get('cell')
-                    if board.color_at(parse_square(cell)) == board.turn:
-                        cur = cell
-                    else:
-                        cur = None
-                else:
-                    cur = board.make_move(request.args.get('move'))
-                    update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
-                    args = board.get_board_for_json()
-                    args['path'] = request.path
-                    socketio.emit('update_board', args)
-                    if color == 'white' and not board.turn or color == 'black' and board.turn and not game.is_finished:
-                        en_move = engine_move(board.fen(), game.level)
-                        if en_move is not None:
-                            board.push(en_move)
-                    update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
-                    game.fen = board.fen()
-                    game.moves = ' '.join(move.uci() for move in board.move_stack)
-                    db_sess.commit()
-                    db_sess.close()
-                    args = board.get_board_for_json()
-                    args['path'] = request.path
-                    socketio.emit('update_board', args)
-                return jsonify(board.get_board_for_json(selected=cur))
-            return jsonify(board.get_board_for_json())
-        return jsonify(board.get_board_for_json())
-    lst = board.get_board_for_json()['board']
-    if current_user.id == user_id:
-        role = color[0]
-    else:
-        role = 's'
-    db_sess.close()
-    return render_template('game.html', board=lst, role=role, game=game,
-                           white_player=white_player, black_player=black_player, end_game=game.is_finished,
-                           result=game.result, reason=game.reason, turn=board.turn, type='engine', url=request.url, id=game.id)
 
 
 @app.route('/game/<int:game_id>')
 def play_game(game_id):
     db_sess = db_session.create_session()
-
     game = db_sess.get(Game, game_id)
-    if current_user.is_authenticated:
-        if game.white_player is None and game.black_player != current_user.id or game.black_player is None and game.white_player != current_user.id:
-            if game.white_player is None:
-                game.white_player = current_user.id
-            else:
-                game.black_player = current_user.id
-            db_sess.commit()
-            socketio.emit('reload')
-    board = get_board_game(game)
+    if request.is_json:
+        data = request.args
+        board = Board(game.fen)
+        board.push(Move.from_uci(data['from'] + data['to']))
+        game.fen = board.fen()
+        db_sess.commit()
+        socketio.emit('move', data)
+        db_sess.close()
+        return jsonify()
     white_player = db_sess.get(User, game.white_player)
     black_player = db_sess.get(User, game.black_player)
-    if request.is_json:
-        if current_user == white_player and board.turn or current_user == black_player and not board.turn:
-            if request.args.get('type') == 'cell':
-                cell = request.args.get('cell')
-                if board.color_at(parse_square(cell)) == board.turn:
-                    cur = cell
-                else:
-                    cur = None
-            else:
-                cur = board.make_move(request.args.get('move'))
-                update_game(game, *check_position(board.fen(), white_player, black_player), white_player, black_player)
-                args = board.get_board_for_json()
-                args['path'] = request.path
-                args['is_finished'] = game.is_finished
-                socketio.emit('update_board', args)
-                game.fen = board.fen()
-                game.moves = ' '.join(move.uci() for move in board.move_stack)
-                db_sess.commit()
-            dct = board.get_board_for_json(selected=cur)
-            dct['is_finished'] = game.is_finished
-            dct['reason'] = game.reason
-            dct['result'] = game.result
-            db_sess.close()
-            return jsonify(dct)
-        return jsonify(board.get_board_for_json())
-    lst = board.get_board_for_json()['board']
     if current_user.is_authenticated:
         if current_user.id == game.white_player:
             role = 'w'
@@ -238,23 +143,10 @@ def play_game(game_id):
         else:
             role = 's'
     else:
-        role = 'spectator'
+        role = 's'
     db_sess.close()
-    return render_template('game.html', board=lst, role=role, game=game,
-                           white_player=white_player, black_player=black_player, end_game=game.is_finished,
-                           result=game.result, reason=game.reason, turn=board.turn, type=game.type, url=request.url, id=game.id)
-
-
-@socketio.event
-def move(data):
-    db_sess = db_session.create_session()
-    game = db_sess.get(Game, data['id'])
-    board = Board(game.fen)
-    board.push(Move.from_uci(data['from'] + data['to']))
-    game.fen = board.fen()
-    db_sess.commit()
-    socketio.emit('move', data)
-    db_sess.close()
+    return render_template('game.html', role=role, game=game, white_player=white_player,
+                           black_player=black_player, end_game=game.is_finished, url=request.url)
 
 
 @app.route('/analysis/<int:game_id>')
@@ -417,6 +309,11 @@ def load_user(user_id):
 def logout():
     logout_user()
     return redirect("/")
+
+
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    return redirect('/register')
 
 
 def check_position(fen, white_player=None, black_player=None):

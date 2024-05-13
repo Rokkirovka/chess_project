@@ -1,23 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script>var role = '{{role}}'; var id = {{id}}; var fen = '{{game.fen}}'</script>
+<script>var role = '{{role}}'; var id = {{game.id}}; var fen = '{{game.fen}}'</script>
+<script src="{{ url_for('static', filename='js/user_game.js') }}"></script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
-
-{% if (white_player is none or black_player is none) and type != 'engine' %}
-    {% if not current_user.is_authenticated %}
-        <div class="message">Незарегистрированный пользователь не может принять игру.</div>
-    {% else %}
-        {% if type == 'fast' %}
-            <div class="message">Подождите, пока мы подберем вам соперника...</div>
-        {% else %}
-            <div class="message">Отправьте эту ссылку вашему сопернику: {{ url }}. Первый, кто пройдет по ней, сыграет с вами. </div>
-        {% endif %}
-    {% endif %}
-{% else %}
-    {% if role == 'black' %}
-        {% set board = board[::-1] %}
-    {% endif %}
 
 <div class="party">
     <div class="game-info">
@@ -36,7 +22,7 @@
         {% else %}
             <div>Черные: Stockfish</div>
         {% endif %}
-        <div>{{ type|capitalize }}</div>
+        <div>{{ game.type|capitalize }}</div>
         {% if end_game %}
             <div class="analysis"><a href="../analysis/{{ id }}" class="analysis-link">Анализировать партию</a></div>
         {% else %}
@@ -49,6 +35,5 @@
 </div>
 <br>
 </div>
-{% endif %}
 
 {% endblock %}
