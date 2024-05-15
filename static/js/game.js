@@ -26,8 +26,8 @@ let config = {
 function onDragStart (source, piece, position, orientation) {
   if (game.isGameOver()) return false
 
-  if ((game.turn() === 'w' && ((piece.search(/^b/) !== -1) || role !== 'w')) ||
-      (game.turn() === 'b' && ((piece.search(/^w/) !== -1) || role !== 'b'))) {
+  if ((game.turn() === 'w' && ((piece.search(/^b/) !== -1) || !(role.includes('w')))) ||
+      (game.turn() === 'b' && ((piece.search(/^w/) !== -1) || !(role.includes('b'))))) {
     return false
   }
 }
@@ -66,8 +66,8 @@ function onMouseoverSquare (square, piece) {
     verbose: true
   })
 
-    if ((game.turn() === 'w' &&  role !== 'w') ||
-      (game.turn() === 'b' && role !== 'b')) {
+    if ((game.turn() === 'w' &&  !role.includes('w')) ||
+      (game.turn() === 'b' && !role.includes('w'))) {
     return
     }
     if (moves.length === 0) return

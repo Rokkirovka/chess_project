@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script>let role = 'wb'; let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';</script>
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
 
 <div class="party">
     <div class="score">
@@ -10,31 +13,9 @@
         </div>
     </div>
 
-<table class="chess-board">
-    <tbody>
-        {% for row in range(7, -1, -1) %}
-            <tr>
-                {% for col in range(8) %}
-                    {% set cell = board[row * 8 + col] %}
-                    {% set color = cell['color'] %}
-                    {% set piece = cell['piece'] %}
-                    {% set name = cell['name'] %}
-                    <td class="cell"
-                            draggable="true"
-                            ondragstart="cell_start_drag(this.id)"
-                            ondragover="cell_drag_over(event)"
-                            ondrop="cell_drop(this.id)"
-                            onclick="cell_click(this.id)"
-                            style="background-color: {{ color }};"
-                            id="{{ name }}">
-                        <span class="cell-piece">{{ piece }}</span>
-                    </td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<br>
+    <div class="chess-board">
+        <div id="chessboard"></div>
+    </div>
 </div>
 
 {% endblock %}

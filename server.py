@@ -1,17 +1,15 @@
 import datetime
 from random import choice
 
-import chess.engine
+from data.engine import engine_move, engine_analysis
 from chess import Move, parse_square, Board, square_name
 from flask import Flask, render_template, request, redirect, jsonify, url_for
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_socketio import SocketIO, emit
 from flask_restful import Api
 from data import chess_resources
-from data.engine import engine_analysis, engine_move
 
 from data import db_session
-from data.chess_to_html import ImprovedBoard
 from data.games import Game, EngineGame
 from data.rating_calculator import rating_calculation
 from data.users import User
@@ -38,7 +36,7 @@ def main():
 @app.route('/')
 @app.route('/home')
 def home():
-    return render_template('home.html')
+    return render_template('home.html', title='Шахматы')
 
 
 @app.route('/create_game', methods=['GET', 'POST'])
@@ -113,7 +111,7 @@ def new_engine_game():
             color = choice(['w', 'b'])
         else:
             color = 'w' if form.color.data == '1' else 'b'
-        board = ImprovedBoard()
+        board = Board()
         if color == 'b':
             board.push(engine_move(board.fen(), form.level.data))
         return render_template('engine_game.html', level=form.level.data, role=color)
@@ -145,7 +143,7 @@ def play_game(game_id):
     else:
         role = 's'
     db_sess.close()
-    return render_template('game.html', role=role, game=game, white_player=white_player,
+    return render_template('game.html', title='Игра', role=role, game=game, white_player=white_player,
                            black_player=black_player, end_game=game.is_finished, url=request.url)
 
 
@@ -156,57 +154,32 @@ def analysis_game(game_id):
     board = get_board_game(game)
     white_player = db_sess.get(User, game.white_player)
     black_player = db_sess.get(User, game.black_player)
-    if request.is_json:
-        move_number = int(request.args.get('move_number'))
-        board_copy = board.copy()
-        if move_number != -1:
-            for _ in range(len(board_copy.move_stack) - move_number):
-                board_copy.pop()
-        dct = board.get_board_for_json(move_number=move_number)
-        rate, score = engine_analysis(board_copy.fen())
-        dct['rate'] = rate
-        dct['score'] = str(score)
-        db_sess.close()
-        return jsonify(dct)
-    rate, score = engine_analysis(board.fen())
-    moves = [(board.move_stack[x * 2: x * 2 + 2]) for x in range((len(board.move_stack) + 1) // 2)]
     db_sess.close()
-    return render_template('analysis_game.html',
-                           board=board.get_board_for_json()['board'],
+    if request.is_json:
+        data = request.args
+        score = engine_analysis(data['fen'])
+        return jsonify(score)
+    moves = [[square_name(move.from_square), square_name(move.to_square)] for move in board.move_stack]
+    score = engine_analysis(board.fen())
+    return render_template('analysis_game.html', title='Анализ',
                            white_player=white_player,
                            black_player=black_player,
                            reason=game.reason,
                            result=game.result,
                            moves=moves,
-                           score=score,
-                           rate=str(rate))
+                           fen=game.fen,
+                           score=score)
 
 
-@app.route('/analysis/')
+@app.route('/analysis')
 def analysis_position():
-    board = ImprovedBoard()
+    board = Board()
     if request.is_json:
-        if request.args.get('board_fen'):
-            board = ImprovedBoard(request.args.get('board_fen'))
-        if request.args.get('type') == 'cell':
-            cell = request.args.get('cell')
-            if board.color_at(parse_square(cell)) == board.turn:
-                cur = cell
-            else:
-                cur = None
-            dct = board.get_board_for_json(selected=cur)
-        else:
-            cur = board.make_move(request.args.get('move'))
-            rate, score = engine_analysis(board.fen())
-            dct = board.get_board_for_json(selected=cur)
-            dct['rate'] = rate
-            dct['score'] = str(score)
-        return jsonify(dct)
-    rate, score = engine_analysis(board.fen())
-    return render_template('analysis_position.html',
-                           board=board.get_board_for_json()['board'],
-                           score=score,
-                           rate=rate)
+        data = request.args
+        score = engine_analysis(data['fen'])
+        return jsonify(score)
+    score = engine_analysis(board.fen())
+    return render_template('analysis_position.html', score=score, title='Анализ')
 
 
 @app.route('/profile/<int:user_id>')
@@ -229,7 +202,7 @@ def profile(user_id):
                                                    (Game.white_player == int(user.id))) & (Game.is_finished == 0)).all()
     unfinished_games = {x.id: [x, get_board_game(x).get_board_for_json()] for x in unfinished_games}
     db_sess.close()
-    return render_template('profile.html', user=user,
+    return render_template('profile.html', user=user, title=f'Профиль {user.nick}',
                            all_games=all_games,
                            win_games=win_games,
                            draw_games=draw_games,
@@ -279,7 +252,7 @@ def login():
             db_sess.close()
             return redirect("/")
         db_sess.close()
-        return render_template('login.html',
+        return render_template('login.html', title='Авторизация',
                                message="Неправильный логин или пароль",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
@@ -292,8 +265,8 @@ def search():
         nick = request.form['nick'].lower()
         users = db_sess.query(User).filter(User.nick.like(f'%{nick}%')).all()
         db_sess.close()
-        return render_template('search.html', users=users)
-    return render_template('search.html', users=[])
+        return render_template('search.html', users=users, title='Поиск',)
+    return render_template('search.html', title='Поиск', users=[])
 
 
 @login_manager.user_loader
@@ -319,7 +292,7 @@ def unauthorized_callback():
 def check_position(fen, white_player=None, black_player=None):
     wr, br = None, None
     is_finished = 1
-    board = ImprovedBoard(fen)
+    board = Board(fen)
     if board.is_checkmate():
         reason = 'Checkmate'
         if board.turn:
@@ -354,10 +327,10 @@ def update_game(game, result, reason, is_finished, wr, br, white_player, black_p
 
 
 def get_board_game(game):
-    board = ImprovedBoard()
+    board = Board()
     moves = game.moves.split()
     for move in moves:
-        board.push(chess.Move.from_uci(move))
+        board.push(Move.from_uci(move))
     return board
 
 

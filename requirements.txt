@@ -10,3 +10,4 @@ sqlalchemy
 wtforms
 flask_wtf
 python-dotenv
+stockfish
