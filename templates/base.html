@@ -10,6 +10,7 @@
     <script> var exports = {}; </script>
     <script src="{{ url_for('static', filename='js/chess.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chessboard-1.0.0.js') }}"></script>
+    <script>const socket = io(); socket.on('start_game', function(data){location.href = '/game/' + data})</script>
     <title>{{title}} • Chess</title>
 </head>
 <body>

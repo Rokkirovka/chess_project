@@ -1,4 +1,3 @@
-const socket = io();
 let board, game, orientation;
 var whiteSquareGrey = '#a9a9a9';
 var blackSquareGrey = '#696969';
@@ -37,9 +36,14 @@ function onSnapEnd () {
 }
 
 socket.on('move', function(move) {
-    board.move(move.from + '-' + move.to);
     game.move({from: move.from, to: move.to, promotion: 'q'})
+    board.position(game.fen())
 });
+
+socket.on('game_over', function(data) {
+    $('.end').text(data[0] + ' • ' + data[1])
+    $('.analysis-link').text('Анализировать партию')
+})
 
 socket.on('reload', function() {
     location.reload();
@@ -67,7 +71,7 @@ function onMouseoverSquare (square, piece) {
   })
 
     if ((game.turn() === 'w' &&  !role.includes('w')) ||
-      (game.turn() === 'b' && !role.includes('w'))) {
+      (game.turn() === 'b' && !role.includes('b'))) {
     return
     }
     if (moves.length === 0) return

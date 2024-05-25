@@ -1,156 +1,87 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<script>
+    function showContent(contentId) {
+        $(".tab-content").children().hide();
+        $("#" + contentId).show();
+    }
+</script>
 
-<div class="statistic">
-    <div class="statistic-items">
-        <p class="statistic-item">{{ user.nick }}</p>
-        <p class="statistic-item">Статистика</p>
-        <p class="statistic-item">Дата регистрации: {{ user.registration_date.date() }} </p>
-        <p class="statistic-item">Рейтинг: {{ user.rating }}</p>
-        <p class="statistic-item">Завершенных игр: {{ all_games | length }}</p>
-        <p class="statistic-item">Незавершенных игр: {{ unfinished_games | length }}</p>
-        {% if all_games | length == 0 %}
-        <p class="statistic-item">Процент побед: <span>0%</span> </p>
-        <p class="statistic-item">Процент ничьих: <span>0%</span> </p>
-        <p class="statistic-item">Процент поражений: <span>0%</span> </p>
-        {% else %}
-        <p class="statistic-item">Процент побед: <span>{{ (win_games | length / all_games | length * 100) | round(2) }}%</span> </p>
-        <p class="statistic-item">Процент ничьих: <span>{{ (draw_games | length / all_games | length * 100) | round(2) }}%</span> </p>
-        <p class="statistic-item">Процент поражений: <span>{{ (loose_games | length / all_games | length * 100) | round(2) }}%</span> </p>
-        {% endif %}
+<div class="profile">
+    <div class="statistic">
+        <div class="statistic-items">
+            <p class="statistic-item">{{ user.nick }}</p>
+            <p class="statistic-item">Статистика</p>
+            <p class="statistic-item">Дата регистрации: {{ user.registration_date.date() }} </p>
+            <p class="statistic-item">Рейтинг: {{ user.rating }}</p>
+            <p class="statistic-item">Завершенных игр: {{ all_games | length }}</p>
+            <p class="statistic-item">Незавершенных игр: {{ unfinished_games | length }}</p>
+            {% if all | length == 0 %}
+            <p class="statistic-item">Процент побед: <span>0%</span> </p>
+            <p class="statistic-item">Процент ничьих: <span>0%</span> </p>
+            <p class="statistic-item">Процент поражений: <span>0%</span> </p>
+            {% else %}
+            <p class="statistic-item">Процент побед: <span>{{ (wins | length / all | length * 100) | round(2) }}%</span> </p>
+            <p class="statistic-item">Процент ничьих: <span>{{ (draws | length / all | length * 100) | round(2) }}%</span> </p>
+            <p class="statistic-item">Процент поражений: <span>{{ (looses | length / all | length * 100) | round(2) }}%</span> </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="games">
+        <div class="tab">
+            <div class="tab-content">
+                <div id="win">
+                    {{wins}}
+                </div>
+                <div id="loose" style="height: 95%;">
+                    <table style="width: 100%; margin: 20px; overflow-y:scroll; height: 100%; display:block;">
+                        <tbody>
+                            {% for game in looses %}
+                                <tr>
+                                    <td rowspan="5">
+                                        <a href="/game/{{game.id}}"><div id="{{ 'board' + game.id|string }}" style="width: 300px"></div></a>
+                                        <script>var board = Chessboard('board' + {{game.id|string}}, {
+                                                    position: '{{game.fen}}',
+                                                    pieceTheme: '../static/img/chesspieces/wikipedia/{piece}.png',
+                                                    showNotation: false
+                                        })
+                                        </script>
+                                    </td>
+                                    <td>Партия {{ game.id }}</td>
+                                </tr>
+                                <tr><td>Белые: {{ game.white_player }}</td></tr>
+                                <tr><td>Черные: {{ game.black_player }}</td></tr>
+                                <tr><td>Результат: {{ game.result }}</td></tr>
+                                <tr><td><a href="/analysis/{{ game.id }}">Анализировать партию</a></td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="draw">
+                    <table>
+                        <tbody>
+                            {% for game in draws %}
+                                <tr>{{ game }}</tr>
+                            {% endfor %}
+                        </tbody>>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-nav">
+                <input checked id="win-btn" name="tab-btn" type="radio" value="">
+                <label for="win-btn" onclick="showContent('win')">Победы</label>
+                <input id="loose-btn" name="tab-btn" type="radio" value="">
+                <label for="loose-btn" onclick="showContent('loose')">Поражения</label>
+                <input id="draw-btn" name="tab-btn" type="radio" value="">
+                <label for="draw-btn" onclick="showContent('draw')">Ничьи</label>
+                <input id="tab-btn-4" name="tab-btn" type="radio" value="">
+                <label for="tab-btn-4">Текущие</label>
+            </div>
+        </div>
     </div>
 </div>
-{% if unfinished_games %}
-    <p class="games-heading">Незавершенные игры</p>
-    <div class="unfinished_games">
-    {% for id in unfinished_games %}
-        {% set board = unfinished_games[id][1]['board'] %}
-        {% if loop.index % 5 != 0 %}
-            {% set style = "float: left;" %}
-        {% else %}
-            {% set style = ";" %}
-        {% endif %}
-        <a class="game-link" href="../game/{{ id }}">
-            <table class="chess-board-mini">
-                <tbody>
-                    {% for row in range(7, -1, -1) %}
-                        <tr>
-                            {% for col in range(8) %}
-                                {% set cell = board[row * 8 + col] %}
-                                {% set color = cell['color'] %}
-                                {% set piece = cell['piece'] %}
-                                <td class="cell"
-                                        style="background-color: {{ color }};">
-                                    <span class="cell-piece">{{ piece }}</span>
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </a>
-    {% endfor %}
-    </div>
-{% endif %}
-
-{% if win_games %}
-    <p class="games-heading">Выигранные игры</p>
-    <div class="win_games">
-    {% for id in win_games %}
-        {% set board = win_games[id][1]['board'] %}
-        {% if loop.index % 5 != 0 %}
-            {% set style = "float: left;" %}
-        {% else %}
-            {% set style = ";" %}
-        {% endif %}
-        <a class="game-link" href="../game/{{ id }}">
-            <table class="chess-board-mini">
-                <tbody>
-                    {% for row in range(7, -1, -1) %}
-                        <tr>
-                            {% for col in range(8) %}
-                                {% set cell = board[row * 8 + col] %}
-                                {% set color = cell['color'] %}
-                                {% set piece = cell['piece'] %}
-                                <td class="cell"
-                                        style="background-color: {{ color }};">
-                                    <span class="cell-piece">{{ piece }}</span>
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </a>
-    {% endfor %}
-    </div>
-{% endif %}
-
-{% if draw_games %}
-    <p class="games-heading">Игры вничью</p>
-    <div class="draw_games">
-    {% for id in draw_games %}
-        {% set board = draw_games[id][1]['board'] %}
-        {% if loop.index % 5 != 0 %}
-            {% set style = "float: left;" %}
-        {% else %}
-            {% set style = ";" %}
-        {% endif %}
-        <a class="game-link" href="../game/{{ id }}">
-            <table class="chess-board-mini">
-                <tbody>
-                    {% for row in range(7, -1, -1) %}
-                        <tr>
-                            {% for col in range(8) %}
-                                {% set cell = board[row * 8 + col] %}
-                                {% set color = cell['color'] %}
-                                {% set piece = cell['piece'] %}
-                                <td class="cell"
-                                        style="background-color: {{ color }};">
-                                    <span class="cell-piece">{{ piece }}</span>
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </a>
-    {% endfor %}
-    </div>
-{% endif %}
-
-{% if loose_games %}
-    <p class="games-heading">Проигранные игры</p>
-    <div class="loose_games">
-    {% for id in loose_games %}
-        {% set board = loose_games[id][1]['board'] %}
-        {% if loop.index % 5 != 0 %}
-            {% set style = "float: left;" %}
-        {% else %}
-            {% set style = ";" %}
-        {% endif %}
-        <a class="game-link" href="../game/{{ id }}">
-            <table class="chess-board-mini">
-                <tbody>
-                    {% for row in range(7, -1, -1) %}
-                        <tr>
-                            {% for col in range(8) %}
-                                {% set cell = board[row * 8 + col] %}
-                                {% set color = cell['color'] %}
-                                {% set piece = cell['piece'] %}
-                                <td class="cell"
-                                        style="background-color: {{ color }};">
-                                    <span class="cell-piece">{{ piece }}</span>
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </a>
-    {% endfor %}
-    </div>
-{% endif %}
 
 {% endblock %}

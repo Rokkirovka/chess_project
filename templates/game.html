@@ -8,7 +8,7 @@
 <div class="party">
     <div class="game-info">
         {% if end_game %}
-            <div class="end">{{ result }} • {{ reason }}</div>
+            <div class="end">{{ game.result }} • {{ game.reason }}</div>
         {% else %}
             <div class="end"></div>
         {% endif %}
@@ -24,9 +24,9 @@
         {% endif %}
         <div>{{ game.type|capitalize }}</div>
         {% if end_game %}
-            <div class="analysis"><a href="../analysis/{{ id }}" class="analysis-link">Анализировать партию</a></div>
+            <div class="analysis"><a href="../analysis/{{ game.id }}" class="analysis-link">Анализировать партию</a></div>
         {% else %}
-            <div class="analysis"><a href="../analysis/{{ id }}" class="analysis-link"></a></div>
+            <div class="analysis"><a href="../analysis/{{ game.id }}" class="analysis-link"></a></div>
         {% endif %}
     </div>
 
