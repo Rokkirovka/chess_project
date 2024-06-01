@@ -203,9 +203,10 @@ def profile(user_id):
               or game.result == '1-0' and game.black_player == user.id]
     draws = [game for game in user_games if game.result == '1/2-1/2']
     finished = [game for game in user_games if game.is_finished]
+    unfinished = [game for game in user_games if not game.is_finished]
     db_sess.close()
     return render_template('profile.html', user=user, title=f'Профиль {user.nick}',
-                           wins=wins, looses=looses, draws=draws, all=finished)
+                           wins=wins, looses=looses, draws=draws, all=finished, unfinished=unfinished)
 
 
 @app.route('/register', methods=['GET', 'POST'])

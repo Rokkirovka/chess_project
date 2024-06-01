@@ -5,29 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chessboard-1.0.0.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
     <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <script> var exports = {}; </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chess.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chessboard-1.0.0.js') }}"></script>
     <script>const socket = io(); socket.on('start_game', function(data){location.href = '/game/' + data})</script>
     <title>{{title}} • Chess</title>
 </head>
 <body>
-<ul class="menu">
-    <li class="menu-row"><a class="menu-item" href="/">Chess</a></li>
+<div class="menu">
+    <div class="menu-row"><a class="menu-item" href="/">Chess</a></div>
     {% if current_user.is_authenticated %}
-        <li class="menu-row"><span class="menu-item">{{ current_user.nick }}</span></li>
-        <li class="menu-row"> <a class="menu-item" href="/profile/{{ current_user.id }}">Профиль</a></li>
-        <li class="menu-row"><a class="menu-item" href="/logout">Выйти</a></li>
-        <li class="menu-row"><a class="menu-item" href="/analysis">Анализ</a></li>
-        <li class="menu-row"><a class="menu-item" href="/search">Поиск игрока</a></li>
+        <div class="menu-row"><a class="menu-item" href="/analysis">Анализ</a></div>
+        <div class="menu-row"><a class="menu-item" href="/search">Поиск игрока</a></div>
+        <div class="menu-row" style="margin-left: auto;">
+            <div class="menu-dropdown"><span class="menu-item" onclick="showDropdownContent('main')">{{ current_user.nick }}</span></div>
+        </div>
+        <div class="dropdown-content" id="main">
+            <a class="dropdown-item" href="/profile/{{ current_user.id }}">Профиль</a>
+            <a class="dropdown-item" href="/logout">Выйти</a>
+            <div class="dropdown-item" onclick="showDropdownContent('board-style')">Оформление доски</div>
+        </div>
+        <div class="dropdown-content" id="board-style">
+            <div class="dropdown-item" onclick="showDropdownContent('main')">Назад</div>
+            красный
+            желтый
+        </div>
     {% else %}
-        <li class="menu-row"><span class="menu-item">Гость</span></li>
-        <li class="menu-row"><a class="menu-item" href="/analysis">Анализ</a></li>
-        <li class="menu-row"><a class="menu-item" href="/search">Поиск игрока</a></li>
+        <div class="menu-row"><span class="menu-item">Гость</span></div>
+        <div class="menu-row"><a class="menu-item" href="/analysis">Анализ</a></div>
+        <div class="menu-row"><a class="menu-item" href="/search">Поиск игрока</a></div>
     {% endif %}
-</ul>
+</div>
 {% block content %}{% endblock %}
 </body>
 </html>

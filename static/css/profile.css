@@ -7,7 +7,7 @@
 }
 
 .statistic {
-    margin-top: 3%;
+    margin-top: 10vh;
     display: inline-block;
     vertical-align: top;
     width: 500px;
@@ -26,7 +26,7 @@
 .statistic-item {
     margin: 0;
     padding: 0;
-    font-size: 3.5vh;
+    font-size: 32px;
     color: white;
     text-decoration: none;
 }
@@ -34,7 +34,7 @@
 
 .games{
     display: inline-block;
-    margin-top: 3%;
+    margin-top: 10vh;
     vertical-align: top;
     width: 600px;
 }
@@ -76,6 +76,9 @@
 .tab-content > div{
     display: none;
 }
+#win{
+    display: block;
+}
 
 .tab-content {
     background-color: white;
@@ -88,4 +91,33 @@
 #content-2:has(~ .tab-nav > #tab-btn-2:checked),
 #content-3:has(~ .tab-nav > #tab-btn-3:checked) {
     display: block;
+}
+
+@media (max-width: 1100px) {
+    .profile{
+        flex-wrap: wrap;
+        align-items: center;
+        align-content: flex-start;
+    }
+    .statistic{
+        width: 80%;
+        height: 60vw;
+    }
+    .statistic-item{
+        font-size: 5vw;
+    }
+    .statistic-items{
+        height: 97%;
+        border-radius: 10px 10px 0 0;
+    }
+    .games{
+        width: 80%;
+        margin-top: 0;
+    }
+    .tab{
+        border-radius: 0 0 10px 10px;
+    }
+    .tab-content{
+        min-height: 600px;
+    }
 }

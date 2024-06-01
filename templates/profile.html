@@ -2,12 +2,6 @@
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-<script>
-    function showContent(contentId) {
-        $(".tab-content").children().hide();
-        $("#" + contentId).show();
-    }
-</script>
 
 <div class="profile">
     <div class="statistic">
@@ -16,8 +10,8 @@
             <p class="statistic-item">Статистика</p>
             <p class="statistic-item">Дата регистрации: {{ user.registration_date.date() }} </p>
             <p class="statistic-item">Рейтинг: {{ user.rating }}</p>
-            <p class="statistic-item">Завершенных игр: {{ all_games | length }}</p>
-            <p class="statistic-item">Незавершенных игр: {{ unfinished_games | length }}</p>
+            <p class="statistic-item">Завершенных игр: {{ all | length }}</p>
+            <p class="statistic-item">Незавершенных игр: {{ unfinished | length }}</p>
             {% if all | length == 0 %}
             <p class="statistic-item">Процент побед: <span>0%</span> </p>
             <p class="statistic-item">Процент ничьих: <span>0%</span> </p>
@@ -33,19 +27,18 @@
     <div class="games">
         <div class="tab">
             <div class="tab-content">
-                <div id="win">
-                    {{wins}}
-                </div>
-                <div id="loose" style="height: 95%;">
-                    <table style="width: 100%; margin: 20px; overflow-y:scroll; height: 100%; display:block;">
+                {% for type in [(wins, 'win'), (looses, 'loose'), (draws, 'draw'), (unfinished, 'unfinished')] %}
+                <div id="{{type[1]}}" style="height: 95%;">
+                    <table style="width: 100%; margin: 20px; overflow-y:scroll; scrollbar-width: none; height: 100%; display:block;">
                         <tbody>
-                            {% for game in looses %}
+                            {% for game in type[0] %}
                                 <tr>
-                                    <td rowspan="5">
+                                    <td rowspan="{{ 3 if type[1] == 'unfinished' else 5 }}">
                                         <a href="/game/{{game.id}}"><div id="{{ 'board' + game.id|string }}" style="width: 300px"></div></a>
                                         <script>var board = Chessboard('board' + {{game.id|string}}, {
                                                     position: '{{game.fen}}',
                                                     pieceTheme: '../static/img/chesspieces/wikipedia/{piece}.png',
+                                                    orientation: '{{ 'white' if game.white_player == current_user.id else 'black' }}',
                                                     showNotation: false
                                         })
                                         </script>
@@ -54,31 +47,25 @@
                                 </tr>
                                 <tr><td>Белые: {{ game.white_player }}</td></tr>
                                 <tr><td>Черные: {{ game.black_player }}</td></tr>
-                                <tr><td>Результат: {{ game.result }}</td></tr>
-                                <tr><td><a href="/analysis/{{ game.id }}">Анализировать партию</a></td></tr>
+                                {% if type[1] != 'unfinished' %}
+                                    <tr><td>Результат: {{ game.result }} • {{ game.reason }}</td></tr>
+                                    <tr><td><a href="/analysis/{{ game.id }}">Анализировать партию</a></td></tr>
+                                {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <div id="draw">
-                    <table>
-                        <tbody>
-                            {% for game in draws %}
-                                <tr>{{ game }}</tr>
-                            {% endfor %}
-                        </tbody>>
-                    </table>
-                </div>
+                {% endfor %}
             </div>
             <div class="tab-nav">
                 <input checked id="win-btn" name="tab-btn" type="radio" value="">
-                <label for="win-btn" onclick="showContent('win')">Победы</label>
+                <label for="win-btn" onclick="showTabContent('win')">Победы</label>
                 <input id="loose-btn" name="tab-btn" type="radio" value="">
-                <label for="loose-btn" onclick="showContent('loose')">Поражения</label>
+                <label for="loose-btn" onclick="showTabContent('loose')">Поражения</label>
                 <input id="draw-btn" name="tab-btn" type="radio" value="">
-                <label for="draw-btn" onclick="showContent('draw')">Ничьи</label>
-                <input id="tab-btn-4" name="tab-btn" type="radio" value="">
-                <label for="tab-btn-4">Текущие</label>
+                <label for="draw-btn" onclick="showTabContent('draw')">Ничьи</label>
+                <input id="unfinished-btn" name="tab-btn" type="radio" value="">
+                <label for="unfinished-btn" onclick="showTabContent('unfinished')">Текущие</label>
             </div>
         </div>
     </div>

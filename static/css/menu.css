@@ -1,0 +1,49 @@
+.menu {
+    position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    background-color: #267ba6;
+    overflow: hidden;
+    width: 100%;
+    height: 70px;
+    overflow: visible;
+}
+.menu-row {
+    float: left;
+    line-height: 70px;
+}
+.menu-item {
+    display: block;
+    vertical-align: middle;
+    color: white;
+    text-align: center;
+    padding: 0 20px;
+    text-decoration: none;
+    font-size: 40px;
+    height: 100%;
+}
+
+.menu-dropdown{
+    margin-left: auto;
+    height: 100%;
+}
+
+.dropdown-content{
+    top: 70px;
+    background-color: white;
+    position: absolute;
+    width: 200px;
+    height: 100px;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    right: 0;
+    font-size: 20px;
+    padding: 20px;
+    border-radius: 0 0 7px 7px;
+}
+
+.dropdown-item{
+    text align: left;
+}
