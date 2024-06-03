@@ -1,11 +1,12 @@
 import datetime
-from random import choice
+from random import choice, sample
 
 from chess import Move, Board, square_name
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_restful import Api
-from flask_socketio import SocketIO, join_room
+from flask_socketio import SocketIO, join_room, leave_room, emit
+from string import ascii_letters, digits
 
 from data import chess_resources
 from data import db_session
@@ -15,8 +16,9 @@ from data.users import User
 from forms.user import RegisterForm, LoginForm, GameEngineForm
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+app.config['SECRET_KEY'] = 'yandex_secret_key'
 app.config['waiting'] = []
+app.config['friendly'] = {}
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -36,36 +38,49 @@ def main():
 @app.route('/')
 @app.route('/home')
 def home():
-    if request.is_json:
-        db_sess = db_session.create_session()
-        users = [user for user in app.config['waiting'] if abs(db_sess.get(User, user).rating - current_user.rating) < 200]
-        if users:
-            opponent = choice(users)
-            game = Game()
-            game.white_player, game.black_player = (current_user.id, opponent) if choice([0, 1]) else (
-                opponent, current_user.id)
-            game.type = 'fast'
-            game.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-            game.moves = ''
-            db_sess.add(game)
-            db_sess.commit()
-            game_id = game.id
-            db_sess.close()
-            app.config['waiting'].pop(app.config['waiting'].index(opponent))
-            return jsonify([opponent, game_id])
-        else:
-            app.config['waiting'].append(current_user.id)
-            return jsonify([current_user.id, None])
     return render_template('home.html', title='Шахматы')
 
 
-@socketio.on('join')
-def join(data):
-    room_id = data['room']
-    join_room(room_id)
-    if len(socketio.server.manager.rooms['/'][room_id]) == 2:
-        game_id = data['game_id']
-        socketio.emit('start_game', game_id, room=room_id)
+@socketio.on('append_fast_game')
+def append_fast_game():
+    db_sess = db_session.create_session()
+    users = [user for user in app.config['waiting'] if abs(db_sess.get(User, user).rating - current_user.rating) < 200]
+    if users:
+        opponent = choice(users)
+        if opponent != current_user.id:
+            game = create_new_game(current_user.id, opponent, 'fast')
+            game_id = game.id
+            db_sess.close()
+            app.config['waiting'].pop(app.config['waiting'].index(opponent))
+            join_room(opponent)
+            socketio.emit('start_game', game_id, room=opponent)
+        else:
+            join_room(current_user.id)
+            db_sess.close()
+    else:
+        db_sess.close()
+        app.config['waiting'].append(current_user.id)
+        join_room(current_user.id)
+
+
+@socketio.on('remove_fast_game')
+def remove_fast_game():
+    app.config['waiting'].remove(current_user.id)
+    leave_room(current_user.id)
+
+
+@socketio.on('append_friendly_game')
+def append_friendly_game():
+    token = ''.join(choice(ascii_letters + digits) for _ in range(8))
+    app.config['friendly'][current_user.id] = token
+    join_room(current_user.id)
+    emit('friendly_game_url', request.host + '/friendly/' + token)
+
+
+@socketio.on('remove_friendly_game')
+def remove_friendly_game():
+    del app.config['friendly'][current_user.id]
+    leave_room(current_user.id)
 
 
 @socketio.on('join_game')
@@ -74,36 +89,20 @@ def join_game(data):
     join_room(f'game_{room_id}')
 
 
-@socketio.on('disconnect')
-def disconnect():
-    if current_user.id in app.config['waiting']:
-        app.config['waiting'].remove(current_user.id)
-
-
-@app.route('/create_game', methods=['GET', 'POST'])
+@app.route('/friendly/<game_token>')
 @login_required
-def new_game():
-    db_sess = db_session.create_session()
-    user = db_sess.get(User, current_user.id)
-    game = Game()
-    color = choice(['1', '2'])
-    if color == '1':
-        game.white_player = user.id
-    else:
-        game.black_player = user.id
-    game.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-    game.is_finished = False
-    game.moves = ''
-    game.type = 'friend'
-    db_sess.add(game)
-    db_sess.commit()
-    game_id = str(game.id)
-    db_sess.close()
-    return redirect('/game/' + game_id)
+def create_friendly_game(game_token):
+    opponent = next((key for key, val in app.config['friendly'].items() if val == game_token), None)
+    if opponent is None:
+        return 'Not found'
+    if opponent == current_user.id:
+        return "You can't play with yourself"
+    game = create_new_game(opponent, current_user.id, 'friendly')
+    socketio.emit('start_game', game.id, room=opponent)
+    return redirect(f'/game/{game.id}')
 
 
 @app.route('/engine_game', methods=['GET', 'POST'])
-@login_required
 def new_engine_game():
     if request.is_json:
         data = request.args
@@ -286,6 +285,20 @@ def logout():
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     return redirect('/register')
+
+
+def create_new_game(p1, p2, game_type):
+    db_sess = db_session.create_session()
+    game = Game()
+    game.white_player, game.black_player = sample((p1, p2), 2)
+    game.type = game_type
+    game.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    game.moves = ''
+    db_sess.add(game)
+    db_sess.commit()
+    game.id = game.id
+    db_sess.close()
+    return game
 
 
 def update_game(board, game):

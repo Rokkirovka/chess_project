@@ -1,24 +1,25 @@
 .profile{
     position: relative;
-    top: 8%;
-    height: 92vh;
+    height: 100vh;
     display: flex;
+    flex-wrap: wrap;
+    align-content: space-around;
     justify-content: center;
 }
 
 .statistic {
-    margin-top: 10vh;
     display: inline-block;
     vertical-align: top;
     width: 500px;
+    height: 60vh;
 }
 .statistic-items {
     display: flex;
     flex-direction: column;
     align-content: space-around;
-    justify-content: space-between;
+    justify-content: space-evenly;
     background-color: #267ba6;
-    height: 80%;
+    height: 100%;
     padding: 20px;
     border-radius: 10px 0 0 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -34,16 +35,16 @@
 
 .games{
     display: inline-block;
-    margin-top: 10vh;
     vertical-align: top;
     width: 600px;
+    height: 60vh;
 }
 .tab{
     display: flex;
     flex-wrap: wrap;
     background-color: #267ba6;
     padding: 20px;
-    height: 80%;
+    height: 100%;
     border-radius: 0 10px 10px 0;
 }
 
@@ -85,6 +86,7 @@
     border-radius: 0 7px 7px 7px;
     width: 100%;
     height: 95%;
+    min-height: 200px;
 }
 
 .tab-content #win:has(~ .tab-nav > #tab-btn-1:checked),
@@ -93,7 +95,11 @@
     display: block;
 }
 
-@media (max-width: 1100px) {
+.board{
+    width: 300px;
+}
+
+@media (max-width: 1200px) {
     .profile{
         flex-wrap: wrap;
         align-items: center;
@@ -101,23 +107,38 @@
     }
     .statistic{
         width: 80%;
-        height: 60vw;
+        min-height: 500px;
+        margin-top: 140px;
+        padding-bottom: 15px;
     }
     .statistic-item{
         font-size: 5vw;
     }
     .statistic-items{
-        height: 97%;
         border-radius: 10px 10px 0 0;
     }
     .games{
         width: 80%;
+        height: auto;
         margin-top: 0;
     }
     .tab{
         border-radius: 0 0 10px 10px;
     }
-    .tab-content{
-        min-height: 600px;
+    .tab-nav > label{
+        font-size: 2.25vw;
+    }
+}
+
+@media (max-width: 700px) {
+    .statistic{
+        min-height: 200px;
+        height: 350px;
+    }
+    .board{
+        width: 175px;
+    }
+    .tab-nav > label{
+        height: 25px;
     }
 }

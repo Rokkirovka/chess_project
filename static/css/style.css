@@ -9,29 +9,6 @@ body {
     padding: 0;
     }
 
-.home {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 90vh;
-    margin: 0;
-}
-.home-items {
-    text-align: center;
-    background-color: #267ba6;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-.home-item {
-    margin: 10px;
-    font-size: 20px;
-    color: white;
-    font-size: 50px;
-    text-decoration: none;
-    line-height: 100px;
-}
-
 .form-item {
     margin: 10px;
     font-size: 20px;

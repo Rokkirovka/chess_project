@@ -1,24 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script>
-    function fastgame(){
-        $('#fast-game').text('Подбор противника...')
-        $.ajax({type: 'get', contentType: 'application/json', success: function(data){
-            socket.emit('join', {room: data[0], game_id: data[1]});
-            }
-        })
-    }
-</script>
+
 <div class="home">
     <div class="home-items">
         {% if current_user.is_authenticated %}
-            <a href="/create_game" class="home-item">Играть с другом</a> <br>
-            <span class="home-item" id="fast-game" onclick="fastgame()">Быстрая игра</span> <br>
+            <span class="home-item" id="friendly-game" onclick="friendlyGame()">Играть с другом</span>
+            <span class="home-item" id="game-link"></span>
+            <span class="home-item" id="fast-game" onclick="fastGame()">Быстрая игра</span>
             <a href="/engine_game" class="home-item">Играть с компьютером</a>
+            <div class="dot-container">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
         {% else %}
-            <a href="/register" class="home-item">Зарегистрироваться</a> <br>
+            <a href="/register" class="home-item">Зарегистрироваться</a>
             <a href="/login" class="home-item">Войти</a>
+            <a href="/engine_game" class="home-item">Играть с компьютером</a>
         {% endif %}
     </div>
 </div>
