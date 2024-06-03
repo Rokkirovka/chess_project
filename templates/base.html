@@ -17,14 +17,21 @@
 </head>
 <body>
 <div class="menu">
+    <div class="menu-icon" onclick="showDropdownContent('left-main')">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
     <div class="menu-row"><a class="menu-item" href="/">Chess</a></div>
     {% if current_user.is_authenticated %}
         <div class="menu-row"><a class="menu-item" href="/analysis">Анализ</a></div>
         <div class="menu-row"><a class="menu-item" href="/search">Поиск игрока</a></div>
-        <div class="menu-row" style="margin-left: auto;">
-            <div class="menu-dropdown"><span class="menu-item" onclick="showDropdownContent('main')">{{ current_user.nick }}</span></div>
+        <div class="menu-dropdown"><span class="menu-item" onclick="showDropdownContent('right-main')">{{ current_user.nick }}</span></div>
+        <div class="dropdown-content" id="left-main">
+            <a class="dropdown-item" href="/analysis">Анализ</a>
+            <a class="dropdown-item" href="/search">Поиск игрока</a>
         </div>
-        <div class="dropdown-content" id="main">
+        <div class="dropdown-content" id="right-main">
             <a class="dropdown-item" href="/profile/{{ current_user.id }}">Профиль</a>
             <a class="dropdown-item" href="/logout">Выйти</a>
             <div class="dropdown-item" onclick="showDropdownContent('board-style')">Оформление доски</div>

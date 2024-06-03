@@ -29,12 +29,12 @@
             <div class="tab-content">
                 {% for type in [(wins, 'win'), (looses, 'loose'), (draws, 'draw'), (unfinished, 'unfinished')] %}
                 <div id="{{type[1]}}" style="height: 95%;">
-                    <table style="width: 100%; margin: 20px; overflow-y:scroll; scrollbar-width: none; height: 100%; display:block;">
+                    <table style="margin: 20px; overflow-y:scroll; scrollbar-width: none; height: 100%; display:block;">
                         <tbody>
                             {% for game in type[0] %}
                                 <tr>
                                     <td rowspan="{{ 3 if type[1] == 'unfinished' else 5 }}">
-                                        <a href="/game/{{game.id}}"><div id="{{ 'board' + game.id|string }}" style="width: 300px"></div></a>
+                                        <a href="/game/{{game.id}}"><div class="board" id="{{ 'board' + game.id|string }}"></div></a>
                                         <script>var board = Chessboard('board' + {{game.id|string}}, {
                                                     position: '{{game.fen}}',
                                                     pieceTheme: '../static/img/chesspieces/wikipedia/{piece}.png',
