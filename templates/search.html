@@ -1,21 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="search">
-<form action="/search" method="post" class="search-form">
-    <label for="nick">Введите ник игрока:</label>
-    <input type="text" id="nick" name="nick">
-    <button type="submit">Найти</button>
-</form>
-</div>
-<div class="users">
-{% if users %}
-    <p>Найденные игроки:</p>
-    <ul>
-    {% for user in users %}
-        <li style="list-style-type: none;"><a href="../profile/{{ user.id }}">{{ user.nick }}</a>
-    {% endfor %}
-    </ul>
-{% endif %}
+
+<div class="home">
+    <form action="/search" method="post" class="home-items" id="search">
+        <span class="form-item">Введите ник игрока</span>
+        <input type="text" id="nick" name="nick" class="form-control">
+        <button type="submit" class="form-button">Найти</button>
+        <table class="form-table">
+            <tbody>
+            {% for user in users %}
+            <tr><td><a style="color: black;" href="/profile/{{ user.id }}">{{ user.nick }}</a></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
 </div>
 {% endblock %}
