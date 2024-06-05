@@ -9,32 +9,6 @@ body {
     padding: 0;
     }
 
-.form-item {
-    margin: 10px;
-    font-size: 20px;
-    color: white;
-    font-size: 40px;
-    line-height: 50px;
-}
-.form-control{
-    width: 200px;
-    height: 35px;
-    border-radius: 5px;
-    font-size: 25px;
-}
-.form-button{
-    width: 220px;
-    height: 35px;
-    border-radius: 5px;
-    background-color: white;
-    font-size: 20px;
-}
-.form-remember{
-    border-radius: 5px;
-    color: red;
-    font-size: 20px;
-}
-
 .party{
     width: 100%;
     height: 80%;
@@ -109,25 +83,6 @@ body {
     padding: 0;
 }
 
-.chess-board-mini{
-    user-select: none;
-    table-layout: fixed;
-    border-collapse: collapse;
-    display: inline-block;
-    padding-left: 3%;
-    padding-top: 3%;
-}
-.chess-board-mini .cell {
-    height: 2vw;
-    width: 2vw;
-    box-sizing: border-box;
-    text-align: center;
-}
-.chess-board-mini .cell-piece{
-    height: 100%;
-    width: 100%;
-    font-size: 1.5vw;
-}
 .moves-table{
     margin: auto;
 }
@@ -138,29 +93,18 @@ body {
     width: 100%;
     text-align: center;
 }
+
 .game-link{
     text-decoration: none;
     color: black;
 }
+
 .move{
     cursor: pointer;
 }
+
 .move:hover{
     background-color: #ccc;
-}
-.search{
-    font-size: 3vw;
-    width: 100%;
-    text-align: center;
-    position: absolute;
-    top: 10%;
-}
-.users{
-    font-size: 3vw;
-    width: 100%;
-    position: absolute;
-    text-align: center;
-    top: 15%;
 }
 
 .white-1e1d7 {

@@ -11,10 +11,12 @@
     overflow: visible;
     -webkit-user-select: none;
 }
+
 .menu-row {
     float: left;
     line-height: 70px;
 }
+
 .menu-item {
     display: block;
     vertical-align: middle;
@@ -79,18 +81,23 @@
     .menu-icon{
         display: flex;
     }
+
     .menu-row{
         display: none;
     }
+
     .menu{
         height: 45px;
     }
+
     .dropdown-content{
         top: 45px;
     }
+
     .menu-item{
         font-size: 30px;
     }
+
     .menu-dropdown{
         line-height: 45px;
     }

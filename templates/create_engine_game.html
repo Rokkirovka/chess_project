@@ -2,27 +2,28 @@
 
 {% block content %}
 <div class="home">
-    <form class="home-items" action="" method="post">
-        <h1 class="form-item">Играть с компьютером</h1>
+    <form class="home-items" id="engine" action="" method="post">
+        <span class="form-item">Играть с ботом</span>
         {{ form.hidden_tag() }}
-        <p>
-            <span class="form-item">{{ form.color.label }}</span><br>
-            {{ form.color(class="form-control") }}<br>
+            <span class="form-item">{{ form.color.label }}</span>
+            {{ form.color(class="form-control") }}
             {% for error in form.color.errors %}
-                <p class="alert alert-danger" role="alert">
+                <div class="alert alert-danger" role="alert">
                     {{ error }}
-                </p>
+                </div>
             {% endfor %}
-        <p>
-            <span class="form-item">{{ form.level.label }}</span><br>
-            {{ form.level(class="form-control") }}<br>
+            <span class="form-item">{{ form.level.label }}</span>
+            {{ form.level(class="form-control") }}
             {% for error in form.level.errors %}
-                <p class="alert alert-danger" role="alert">
+                <div class="alert alert-danger" role="alert">
                     {{ error }}
-                </p>
+                </div>
             {% endfor %}
-        <p>{{ form.submit(type="submit", class="btn form-button") }}</p>
-        {{message}}
+        {{ form.submit(type="submit", class="btn form-button") }}
+
+        {% if message %}
+            <script>alert('{{ message }}')</script>
+        {% endif %}
     </form>
 </div>
 {% endblock %}

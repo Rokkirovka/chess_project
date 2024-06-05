@@ -117,8 +117,9 @@ def new_engine_game():
         board = Board()
         if color == 'b':
             board.push(engine_move(board.fen(), form.level.data))
-        return render_template('engine_game.html', level=form.level.data, role=color)
-    return render_template('create_engine_game.html', form=form)
+        return render_template('engine_game.html', level=form.level.data, role=color,
+                               title='Игра с компьютером')
+    return render_template('create_engine_game.html', form=form, title='Игра с компьютером')
 
 
 @app.route('/game/<int:game_id>')

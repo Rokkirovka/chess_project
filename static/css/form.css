@@ -1,0 +1,76 @@
+.form-item {
+    color: white;
+    font-size: 40px;
+}
+
+.form-control{
+    width: 220px;
+    height: 35px;
+    border-radius: 5px;
+    border-style: none;
+    font-size: 20px;
+}
+
+.form-button{
+    width: 220px;
+    height: 35px;
+    border-radius: 5px;
+    background-color: white;
+    border-style: none;
+    font-size: 20px;
+}
+
+.form-checkbox{
+    border-radius: 5px;
+    border-style: none;
+    margin: 0;
+    transform: scale(1.5);
+    margin-left: 10px;
+}
+
+#registration{
+    height: 600px;
+    width: 400px;
+}
+
+#authorization{
+    height: 500px;
+    width: 400px;
+}
+
+#engine{
+    height: 400px;
+    width: 400px;
+}
+
+@media (max-width: 700px){
+    .form-item {
+        font-size: 20px;
+    }
+
+    .form-control{
+        width: 160px;
+        height: 25px;
+    }
+
+    .form-button{
+        width: 160px;
+        font-size: 15px;
+        height: 25px;
+    }
+
+    #registration{
+        height: 400px;
+        width: 250px;
+    }
+
+    #authorization{
+        height: 250px;
+        width: 250px;
+    }
+
+    #engine{
+        height: 250px;
+        width: 250px;
+    }
+}

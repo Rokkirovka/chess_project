@@ -2,28 +2,32 @@
 
 {% block content %}
 <div class="home">
-    <form class="home-items" action="" method="post">
-        <h1 class="form-item">Авторизация</h1>
+    <form class="home-items" id="authorization" action="" method="post">
+        <span class="form-item">Авторизация</span>
         {{ form.hidden_tag() }}
-        <p>
-            <span class="form-item">{{ form.email.label }}</span><br>
-            {{ form.email(class="form-control", type="email") }}<br>
+            <span class="form-item">{{ form.email.label }}</span>
+            {{ form.email(class="form-control", type="email") }}
             {% for error in form.email.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
-        <p>
-            <span class="form-item">{{ form.password.label }}</span><br>
-            {{ form.password(class="form-control", type="password") }}<br>
+            <span class="form-item">{{ form.password.label }}</span>
+            {{ form.password(class="form-control", type="password") }}
             {% for error in form.password.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
-        <p>{{ form.remember_me(class="form-remember") }} {{ form.remember_me.label }}</p>
-        {{ form.submit(type="submit", class="btn form-button") }}<br>
-        <span class="form-item">{{message}}</span>
+        <div style="display: flex; align-items: center;">
+            {{ form.remember_me.label(class="form-item") }}
+            {{ form.remember_me(class="form-checkbox") }}
+        </div>
+        {{ form.submit(type="submit", class="btn form-button") }}
+
+        {% if message %}
+            <script>alert('{{ message }}')</script>
+        {% endif %}
     </form>
 </div>
 {% endblock %}
