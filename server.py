@@ -89,6 +89,24 @@ def join_game(data):
     join_room(f'game_{room_id}')
 
 
+@socketio.on('change_piece')
+def change_piece(name):
+    db_sess = db_session.create_session()
+    user = db_sess.get(User, current_user.id)
+    user.pieces = name
+    db_sess.commit()
+    db_sess.close()
+
+
+@socketio.on('change_board')
+def change_board(name):
+    db_sess = db_session.create_session()
+    user = db_sess.get(User, current_user.id)
+    user.board = name
+    db_sess.commit()
+    db_sess.close()
+
+
 @app.route('/friendly/<game_token>')
 @login_required
 def create_friendly_game(game_token):

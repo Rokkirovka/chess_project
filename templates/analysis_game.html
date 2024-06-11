@@ -1,44 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script>let role = ''; let fen = '{{ fen }}'; let moves = {{ moves|safe }};</script>
+<script>let role = ''; let fen = '{{ fen }}'; let moves = {{ moves|safe }}; var pieces = '{{current_user.pieces}}';</script>
 <script src="{{ url_for('static', filename='js/analysis_game.js') }}"></script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 <div class="party">
-    <div class="game-info">
-        <div class="end">{{ result }} • {{ reason }}</div>
-        <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> {{ white_player.rating }}</div>
-        <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
-        <div style="overflow-y: scroll; height: 10vh;">
-        <table class="moves-table">
-            <tbody class="moves-table-body">
-                {% for i in range(0, moves|length, 2) %}
-                    <tr>
-                        <td>
-                            {{ i + 1 }}
-                        </td>
-                        <td>
-                            <span class="move" id="{{ i }}" onclick="move_click(this.id)">{{ moves[i][0] + moves[i][1] }}</span>
-                        </td>
-                        <td>
-                            <span class="move" id="{{ i + 1 }}" onclick="move_click(this.id)">{{ moves[i + 1][0] + moves[i + 1][1] }}</span>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        </div>
-    </div>
-    <div class="score">
-        <div class="rate">{{ score }}</div>
-        <div class="progres-bar">
-            <div class="progres-bar-completed" style="height: {{ rate }}%;"></div>
-        </div>
-    </div>
     <div class="chess-board">
         <div id="chessboard"></div>
+        <div class="game-info">
+            <div class="end">{{ result }} • {{ reason }}</div>
+            <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> {{ white_player.rating }}</div>
+            <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+            <div style="overflow-y: scroll; height: 10vh;">
+            <table class="moves-table">
+                <tbody class="moves-table-body">
+                    {% for i in range(0, moves|length, 2) %}
+                        <tr>
+                            <td>
+                                {{ i // 2 + 1 }}
+                            </td>
+                            <td>
+                                <span class="move" id="{{ i }}" onclick="move_click(this.id)">{{ moves[i][0] + moves[i][1] }}</span>
+                            </td>
+                            <td>
+                                <span class="move" id="{{ i + 1 }}" onclick="move_click(this.id)">{{ moves[i + 1][0] + moves[i + 1][1] if moves|length // 2 > i - 3 else ''}}</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
     </div>
-
 </div>
 
 {% endblock %}

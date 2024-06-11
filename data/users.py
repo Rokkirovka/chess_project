@@ -9,6 +9,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     nick = sqlalchemy.Column(sqlalchemy.String, unique=True)
+    pieces = sqlalchemy.Column(sqlalchemy.String, default='wikipedia')
+    board = sqlalchemy.Column(sqlalchemy.String, default='blue')
     rating = sqlalchemy.Column(sqlalchemy.Integer)
     email = sqlalchemy.Column(sqlalchemy.String, unique=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String)

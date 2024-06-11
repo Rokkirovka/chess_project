@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script>let role = 'wb'; let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';</script>
+<script>let role = 'wb'; let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'; var pieces = '{{current_user.pieces}}';</script>
 <script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 

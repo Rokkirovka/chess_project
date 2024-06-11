@@ -29,28 +29,15 @@
 }
 
 .form-table{
+    display: block;
     width: 360px;
     height: 300px;
     background-color: white;
     border-radius: 7px;
     overflow-y:scroll;
+    scrollbar-width: none;
     padding: 20px;
-}
-
-.form-table tr{
-    display: block;
-    height: 50px;
-}
-
-.form-table td{
-    display: block;
-    width: 100%;
-    text-align: center;
-}
-
-.form-table td{
-    text-align: center;
-    font-size: 30px;
+    font-size: 35px;
 }
 
 #registration{
@@ -87,6 +74,12 @@
         width: 160px;
         font-size: 15px;
         height: 25px;
+    }
+
+    .form-table{
+        width: 220px;
+        height: 220px;
+        font-size: 20px;
     }
 
     #registration{

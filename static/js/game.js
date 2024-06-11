@@ -13,13 +13,32 @@ let config = {
   dropOffBoard: 'snapback',
   snapbackSpeed: 200,
   snapSpeed: 50,
-  pieceTheme: '../static/img/chesspieces/wikipedia/{piece}.png',
+  pieceTheme: '../static/img/chesspieces/' + pieces + '/{piece}.png',
   showErrors: console,
   onDrop: onDrop,
   onSnapEnd: onSnapEnd,
   onDragStart: onDragStart,
   onMouseoutSquare: onMouseoutSquare,
   onMouseoverSquare: onMouseoverSquare,
+}
+
+function setColor(color){
+    if (color == 'blue'){
+        $('.white-1e1d7').css("background-color", "#e9eef2");
+        $('.black-3c85d').css("background-color", "#8ca2ad");
+    }
+    else if (color == 'brown'){
+        $('.white-1e1d7').css("background-color", "#f0d9b5");
+        $('.black-3c85d').css("background-color", "#b58863");
+    }
+    else if (color == 'green'){
+        $('.white-1e1d7').css("background-color", "#ffffdd");
+        $('.black-3c85d').css("background-color", "#86a666");
+    }
+    else if (color == 'pink'){
+        $('.white-1e1d7').css("background-color", "#ecedba");
+        $('.black-3c85d').css("background-color", "#f07373");
+    }
 }
 
 function onDragStart (source, piece, position, orientation) {
@@ -48,10 +67,6 @@ socket.on('game_over', function(data) {
 socket.on('reload', function() {
     location.reload();
 });
-
-function removeGreySquares () {
-  $('#chessboard .square-55d63').css('background', '')
-}
 
 function greySquare (square) {
   var $square = $('#chessboard .square-' + square)
@@ -84,7 +99,7 @@ function onMouseoverSquare (square, piece) {
 }
 
 function onMouseoutSquare (square, piece) {
-  removeGreySquares()
+  setColor(board_color)
 }
 
 function moveIn(moves, target) {

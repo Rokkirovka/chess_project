@@ -45,4 +45,14 @@ function friendlyGame(){
     }
 }
 
+function changePieces(name){
+    socket.emit('change_piece', name)
+    location.reload()
+}
+
+function changeBoard(name){
+    socket.emit('change_board', name)
+    location.reload()
+}
+
 socket.on('friendly_game_url', function(data){$('#game-link').show().text(data)})

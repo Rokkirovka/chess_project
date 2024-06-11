@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/form.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
     <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <script> var exports = {}; </script>
@@ -41,13 +41,51 @@
         </div>
         <div class="dropdown-content" id="right-main">
             <a class="dropdown-item" href="/profile/{{ current_user.id }}">Профиль</a>
-            <a class="dropdown-item" href="/logout">Выйти</a>
             <div class="dropdown-item" onclick="showDropdownContent('board-style')">Оформление доски</div>
+            <div class="dropdown-item" onclick="showDropdownContent('piece-style')">Оформление фигур</div>
+            <a class="dropdown-item" href="/logout">Выйти</a>
         </div>
         <div class="dropdown-content" id="board-style">
-            <div class="dropdown-item" onclick="showDropdownContent('main')">Назад</div>
-            красный
-            желтый
+            <div class="dropdown-item" onclick="showDropdownContent('right-main')">Назад</div>
+            <table style="height: 80px;">
+                <tbody>
+                    <tr>
+                        <td><div class="board-color" onclick="changeBoard('blue')">
+                            <div style="background-color: #e9eef2"></div>
+                            <div style="background-color: #8ca2ad"></div>
+                        </div></td>
+                        <td><div class="board-color" onclick="changeBoard('brown')">
+                            <div style="background-color: #f0d9b5"></div>
+                            <div style="background-color: #b58863"></div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="board-color" onclick="changeBoard('green')">
+                            <div style="background-color: #ffffdd"></div>
+                            <div style="background-color: #86a666"></div>
+                        </div></td>
+                        <td><div class="board-color" onclick="changeBoard('pink')">
+                            <div style="background-color: #ecedba"></div>
+                            <div style="background-color: #f07373"></div>
+                        </div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="dropdown-content" id="piece-style">
+            <div class="dropdown-item" onclick="showDropdownContent('right-main')">Назад</div>
+            <table>
+                <tbody>
+                    <tr>
+                        <td><img class="piece-img" src="/static/img/chesspieces/wikipedia/wQ.png" onclick="changePieces('wikipedia')"></td>
+                        <td><img class="piece-img" src="/static/img/chesspieces/alpha/wQ.png" onclick="changePieces('alpha')"></td>
+                    </tr>
+                    <tr>
+                        <td><img class="piece-img" src="/static/img/chesspieces/pixel/wQ.png" onclick="changePieces('pixel')"></td>
+                        <td><img class="piece-img" src="/static/img/chesspieces/shapes/wQ.png" onclick="changePieces('shapes')"></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 </div>
 {% block content %}{% endblock %}

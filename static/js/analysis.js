@@ -5,7 +5,7 @@ $(document).ready(function(){
 
 
 function onDrop(source, target){
-    removeGreySquares()
+    setColor(board_color)
 
     if (moveIn(game.moves({square: source, verbose: true}), target)){
         game.move({from: source, to: target, promotion: 'q'})

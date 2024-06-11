@@ -6,7 +6,7 @@ $(document).ready(function(){
 
 
 function onDrop(source, target){
-    removeGreySquares()
+    setColor(board_color)
 
     if (moveIn(game.moves({square: source, verbose: true}), target)){
         $.ajax({type: 'get', contentType: 'application/json', data: {from: source, to: target, id: id}})

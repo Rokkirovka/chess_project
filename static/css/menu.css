@@ -40,7 +40,7 @@
     background-color: white;
     position: absolute;
     width: 200px;
-    height: 100px;
+    height: 120px;
     display: none;
     flex-direction: column;
     justify-content: space-between;
@@ -58,6 +58,11 @@
     text align: left;
     text-decoration: none;
     color: black;
+    cursor: pointer;
+}
+
+.dropdown-item:hover{
+    background-color: #c0c0c0;
 }
 
 .menu-icon {
@@ -70,11 +75,38 @@
     cursor: pointer;
 }
 
+.piece-img{
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+}
+
+.piece-img:hover {
+    background-color: #c0c0c0;
+}
+
 .bar {
     width: 100%;
     height: 5px;
     background-color: white;
     border-radius: 5px;
+}
+
+.board-color{
+    display: flex;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.board-color:hover{
+    box-sizing: border-box;
+    border: 2px solid;
+}
+
+.board-color div{
+    width: 50%;
+    height: 100%;
 }
 
 @media (max-width: 1000px) {

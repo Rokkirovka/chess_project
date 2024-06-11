@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<script>var pieces = '{{current_user.pieces}}';</script>
+
 <div class="profile">
     <div class="statistic">
         <div class="statistic-items">
@@ -36,7 +38,7 @@
                                         <a href="/game/{{game.id}}"><div class="board" id="{{ 'board' + game.id|string }}"></div></a>
                                         <script>var board = Chessboard('board' + {{game.id|string}}, {
                                                     position: '{{game.fen}}',
-                                                    pieceTheme: '../static/img/chesspieces/wikipedia/{piece}.png',
+                                                    pieceTheme: '../static/img/chesspieces/' + pieces + '/{piece}.png',
                                                     orientation: '{{ 'white' if game.white_player == current_user.id else 'black' }}',
                                                     showNotation: false
                                         })
