@@ -55,4 +55,55 @@ function changeBoard(name){
     location.reload()
 }
 
+function setColor(color){
+    if (color == 'blue'){
+        $('.white-1e1d7').css("background-color", "#e9eef2");
+        $('.black-3c85d').css("background-color", "#8ca2ad");
+    }
+    else if (color == 'brown'){
+        $('.white-1e1d7').css("background-color", "#f0d9b5");
+        $('.black-3c85d').css("background-color", "#b58863");
+    }
+    else if (color == 'green'){
+        $('.white-1e1d7').css("background-color", "#ffffdd");
+        $('.black-3c85d').css("background-color", "#86a666");
+    }
+    else if (color == 'pink'){
+        $('.white-1e1d7').css("background-color", "#ecedba");
+        $('.black-3c85d').css("background-color", "#f07373");
+    }
+}
+
 socket.on('friendly_game_url', function(data){$('#game-link').show().text(data)})
+
+function upDepth(){
+    depth += 3
+    $('.rate').text('...')
+    $('.depth').text(depth)
+    $('.plus').hide()
+    $.ajax({type: 'get', contentType: 'application/json', data: {fen: game.fen(), depth: depth},
+        success: function(data){
+            $('.rate').text(data.score)
+            if (depth != 30) {
+                $('.plus').show()
+            }
+        }
+    })
+}
+
+function move_click(id){
+    board.position(game_for_moves.history({verbose: true})[id].after)
+    game = new Chess(game_for_moves.history({verbose: true})[id].after)
+    $('.rate').text('...')
+    $('.depth').text(depth)
+    $('.plus').hide()
+    $.ajax({type: 'get', contentType: 'application/json', data: {fen: game.fen(), depth: 15},
+    success: function(data){
+        $('.rate').text(data.score)
+        $('.depth').text(data.depth)
+        depth = data.depth
+        if (depth != 30) {
+            $('.plus').show()
+        }
+    }})
+}

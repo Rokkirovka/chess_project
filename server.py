@@ -182,10 +182,10 @@ def analysis_game(game_id):
     db_sess.close()
     if request.is_json:
         data = request.args
-        score = engine_analysis(data['fen'])
+        score = engine_analysis(data['fen'], data['depth'])
         return jsonify(score)
     moves = [[square_name(move.from_square), square_name(move.to_square)] for move in board.move_stack]
-    score = engine_analysis(board.fen())
+    score = engine_analysis(board.fen(), 15)
     return render_template('analysis_game.html', title='Анализ',
                            white_player=white_player,
                            black_player=black_player,
@@ -198,13 +198,11 @@ def analysis_game(game_id):
 
 @app.route('/analysis')
 def analysis_position():
-    board = Board()
     if request.is_json:
         data = request.args
-        score = engine_analysis(data['fen'])
+        score = engine_analysis(data['fen'], data['depth'])
         return jsonify(score)
-    score = engine_analysis(board.fen())
-    return render_template('analysis_position.html', score=score, title='Анализ')
+    return render_template('analysis_position.html', title='Анализ')
 
 
 @app.route('/profile/<int:user_id>')

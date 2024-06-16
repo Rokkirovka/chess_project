@@ -2,7 +2,11 @@
 
 {% block content %}
 
-<script>var pieces = '{{current_user.pieces}}';</script>
+<script>
+    var pieces = '{{current_user.pieces}}';
+    var board_color = '{{ current_user.board }}';
+    var role = 'w';
+</script>
 
 <div class="profile">
     <div class="statistic">
@@ -36,7 +40,7 @@
                                 <tr>
                                     <td rowspan="{{ 3 if type[1] == 'unfinished' else 5 }}">
                                         <a href="/game/{{game.id}}"><div class="board" id="{{ 'board' + game.id|string }}"></div></a>
-                                        <script>var board = Chessboard('board' + {{game.id|string}}, {
+                                        <script>var miniBoard = Chessboard('board' + {{game.id|string}}, {
                                                     position: '{{game.fen}}',
                                                     pieceTheme: '../static/img/chesspieces/' + pieces + '/{piece}.png',
                                                     orientation: '{{ 'white' if game.white_player == current_user.id else 'black' }}',
@@ -53,6 +57,7 @@
                                     <tr><td><a href="/analysis/{{ game.id }}">Анализировать партию</a></td></tr>
                                 {% endif %}
                             {% endfor %}
+                        <script>setColor(board_color);</script>
                         </tbody>
                     </table>
                 </div>

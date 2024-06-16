@@ -9,5 +9,6 @@ class Analysis(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'analyzes'
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     fen = sqlalchemy.Column(sqlalchemy.String)
+    depth = sqlalchemy.Column(sqlalchemy.Integer)
     best_move = sqlalchemy.Column(sqlalchemy.String)
     score = sqlalchemy.Column(sqlalchemy.String)

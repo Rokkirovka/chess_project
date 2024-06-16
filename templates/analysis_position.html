@@ -1,20 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script>let role = 'wb'; let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'; var pieces = '{{current_user.pieces}}';</script>
+<script>let role = 'wb'; let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';</script>
 <script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 
 <div class="party">
-    <div class="score">
-        <div class="rate">{{ score }}</div>
-        <div class="progres-bar">
-            <div class="progres-bar-completed" style="height: {{ rate }}%;"></div>
-        </div>
-    </div>
-
     <div class="chess-board">
         <div id="chessboard"></div>
+        <div class="game-info">
+            <div style="height: 15%">
+                <div>Глубина анализа: <span class="depth"></span> <span class="plus" onclick="upDepth()">+</span></div>
+                <span>Оценка: </span><span class="rate"></span>
+            </div>
+            <div style="overflow-y: scroll; height: 85%; display: block">
+                <table id="moves-table">
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 

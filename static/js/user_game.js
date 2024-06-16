@@ -1,7 +1,8 @@
 $(document).ready(function(){
     game = new Chess(fen);
     board = Chessboard('chessboard', config);
-    socket.emit('join_game', {game_id: id})
+    socket.emit('join_game', {game_id: id});
+    setColor(board_color);
 })
 
 
