@@ -14,6 +14,7 @@ from data.engine import engine_move, engine_analysis
 from data.games import Game
 from data.users import User
 from forms.user import RegisterForm, LoginForm, GameEngineForm
+from data.rating_calculator import rating_calculation
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandex_secret_key'
@@ -122,28 +123,29 @@ def create_friendly_game(game_token):
 
 @app.route('/engine_game', methods=['GET', 'POST'])
 def new_engine_game():
+    fen = request.args['fen'] if 'fen' in request.args else ''
+    color = request.args['color'] if 'color' in request.args else 'w'
     if request.is_json:
         data = request.args
-        move = engine_move(data['fen'], data['level'])
+        move = engine_move(data['new_fen'], data['level'])
         return jsonify({'from': square_name(move.from_square), 'to': square_name(move.to_square)})
     form = GameEngineForm()
     if form.validate_on_submit():
         if form.color.data == '3':
-            color = choice(['w', 'b'])
+            role = choice(['w', 'b'])
         else:
-            color = 'w' if form.color.data == '1' else 'b'
-        board = Board()
-        if color == 'b':
-            board.push(engine_move(board.fen(), form.level.data))
-        return render_template('engine_game.html', level=form.level.data, role=color,
-                               title='Игра с компьютером')
-    return render_template('create_engine_game.html', form=form, title='Игра с компьютером')
+            role = 'w' if form.color.data == '1' else 'b'
+        return render_template('engine_game.html', level=form.level.data, fen=fen, role=role,
+                               color=color, title='Игра с компьютером')
+    return render_template('create_engine_game.html', form=form, color=color, title='Игра с компьютером')
 
 
 @app.route('/game/<int:game_id>')
 def play_game(game_id):
     db_sess = db_session.create_session()
     game = db_sess.get(Game, game_id)
+    if game is None:
+        return 'Not found'
     if request.is_json:
         data = request.args
         board = Board(game.fen)
@@ -176,6 +178,8 @@ def play_game(game_id):
 def analysis_game(game_id):
     db_sess = db_session.create_session()
     game = db_sess.get(Game, game_id)
+    if game is None:
+        return 'Not found'
     board = get_board_game(game)
     white_player = db_sess.get(User, game.white_player)
     black_player = db_sess.get(User, game.black_player)
@@ -198,17 +202,25 @@ def analysis_game(game_id):
 
 @app.route('/analysis')
 def analysis_position():
+    fen = request.args['fen'] if 'fen' in request.args else ''
     if request.is_json:
         data = request.args
         score = engine_analysis(data['fen'], data['depth'])
         return jsonify(score)
-    return render_template('analysis_position.html', title='Анализ')
+    return render_template('analysis_position.html', fen=fen, title='Анализ')
+
+
+@app.route('/redactor')
+def redactor():
+    return render_template('redactor.html', title='Редактор доски')
 
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
     db_sess = db_session.create_session()
     user = db_sess.get(User, user_id)
+    if user is None:
+        return 'Not found'
     user_games = db_sess.query(Game).filter(
         (Game.black_player == int(user.id)) | (Game.white_player == int(user.id))).all()
     wins = [game for game in user_games
@@ -280,7 +292,7 @@ def search():
         nick = request.form['nick'].lower()
         users = db_sess.query(User).filter(User.nick.like(f'%{nick}%')).all()
         db_sess.close()
-        return render_template('search.html', users=users, title='Поиск', )
+        return render_template('search.html', users=users, title='Поиск')
     return render_template('search.html', title='Поиск', users=[])
 
 
@@ -321,13 +333,24 @@ def create_new_game(p1, p2, game_type):
 def update_game(board, game):
     game.is_finished = 1
     game.result = board.result()
+    wr, br = None, None
+    if game.type == 'fast':
+        db_sess = db_session.create_session()
+        white = db_sess.get(User, game.white_player)
+        black = db_sess.get(User, game.black_player)
+        res = float(game.result.split('-')[0])
+        wr = rating_calculation(white.rating, black.rating, res)
+        br = rating_calculation(black.rating, white.rating, 1 - res)
+        white.rating, black.rating = wr, br
+        db_sess.commit()
+        db_sess.close()
     if board.is_checkmate():
         game.reason = 'checkmate'
     elif board.is_stalemate():
         game.reason = 'stalemate'
     elif board.is_en_passant():
         game.reason = 'passant'
-    return game.result, game.reason
+    return game.result, game.reason, wr, br
 
 
 def get_board_game(game):

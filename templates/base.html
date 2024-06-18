@@ -14,8 +14,13 @@
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <script>
         var exports = {};
-        var pieces = '{{current_user.pieces}}';
-        var board_color = '{{ current_user.board }}';
+        {% if current_user.is_authenticated %}
+            var pieces = '{{current_user.pieces}}';
+            var board_color = '{{ current_user.board }}';
+        {% else %}
+            var pieces = 'wikipedia';
+            var board_color = 'brown';
+        {% endif %}
     </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chess.js') }}"></script>
@@ -32,6 +37,7 @@
     </div>
     <div class="menu-row"><a class="menu-item" href="/">Chess</a></div>
         <div class="menu-row"><a class="menu-item" href="/analysis">Анализ</a></div>
+    <div class="menu-row"><a class="menu-item" href="/redactor">Редактор доски</a></div>
         <div class="menu-row"><a class="menu-item" href="/search">Поиск игрока</a></div>
         {% if current_user.is_authenticated %}
             <div class="menu-dropdown"><span class="menu-item" onclick="showDropdownContent('right-main')">{{ current_user.nick }}</span></div>
@@ -41,6 +47,7 @@
         <div class="dropdown-content" id="left-main">
             <a class="dropdown-item" href="/">Chess</a>
             <a class="dropdown-item" href="/analysis">Анализ</a>
+            <a class="dropdown-item" href="/redactor">Редактор</a>
             <a class="dropdown-item" href="/search">Поиск игрока</a>
         </div>
         <div class="dropdown-content" id="right-main">

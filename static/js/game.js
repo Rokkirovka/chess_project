@@ -89,6 +89,10 @@ socket.on('move', function(move) {
 socket.on('game_over', function(data) {
     $('.end').text(data[0] + ' • ' + data[1])
     $('.analysis-link').text('Анализировать партию')
+    if (data[2] != null && data[3] != null){
+        $('.w-rating').text(data[2])
+        $('.b-rating').text(data[3])
+    }
 })
 
 socket.on('reload', function() {

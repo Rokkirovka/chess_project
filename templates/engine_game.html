@@ -3,8 +3,13 @@
 {% block content %}
 <script>
     var role = '{{ role }}';
-    var fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    {% if fen %}
+        let fen = '{{ fen }}'
+    {% else %}
+        let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    {% endif %}
     var level = {{ level }};
+    var color = '{{ color }}'
 </script>
 <script src="{{ url_for('static', filename='js/engine_game.js') }}"></script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>

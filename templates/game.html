@@ -11,8 +11,8 @@
         <div class="game-info">
             <div class="static-info">
                 <div class="end">{{ game.result + ' • ' + game.reason if end_game else ''}}</div>
-                <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> {{ white_player.rating }}</div>
-                <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> {{ black_player.rating }}</div>
+                <div>Белые: <a href="/profile/{{ white_player.id }}" class="user-link">{{ white_player.nick }}</a> <span class="w-rating">{{ white_player.rating }}</span></div>
+                <div>Черные: <a href="/profile/{{ black_player.id }}" class="user-link">{{ black_player.nick }}</a> <span class="b-rating">{{ black_player.rating }}</span></div>
                 <div>{{ game.type|capitalize }}</div>
                 <div class="analysis"><a href="../analysis/{{ game.id }}" class="analysis-link">{{ 'Анализировать партию' if end_game else '' }}</a></div>
             </div>
