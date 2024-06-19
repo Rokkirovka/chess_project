@@ -205,7 +205,7 @@ def analysis_position():
     fen = request.args['fen'] if 'fen' in request.args else ''
     if request.is_json:
         data = request.args
-        score = engine_analysis(data['fen'], data['depth'])
+        score = engine_analysis(data['new_fen'], data['depth'])
         return jsonify(score)
     return render_template('analysis_position.html', fen=fen, title='Анализ')
 

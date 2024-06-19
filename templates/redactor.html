@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="{{ url_for('static', filename='js/redactor.js') }}"></script>
+
+<div class="party">
+    <div class="chess-board">
+        <div id="chessboard"></div>
+        <div class="game-info">
+            <label for="white-turn">Ход белых</label>
+            <input type="checkbox" id="white-turn">
+            <label for="black-turn">Ход черных</label>
+            <input type="checkbox" id="black-turn">
+
+            <label for="black-rok-0-0">Рокировка черных 0-0</label>
+            <input type="checkbox" id="black-rok-0-0">
+            <label for="black-rok-0-0-0">Рокировка черных 0-0-0</label>
+            <input type="checkbox" id="black-rok-0-0-0" name="black-rok-0-0">
+            <label for="white-rok-0-0">Рокировка белых 0-0</label>
+            <input type="checkbox" id="white-rok-0-0" name="black-rok-0-0">
+            <label for="white-rok-0-0-0">Рокировка белых 0-0-0</label>
+            <input type="checkbox" id="white-rok-0-0-0">
+            <div onclick="playBotFen()" style="cursor: pointer">Играть с компьютером</div>
+            <div onclick="analysisFen()" style="cursor: pointer">Анализировать позицию</div>
+            <div id="error"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

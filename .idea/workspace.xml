@@ -4,18 +4,80 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0118c334-950a-4c87-8e0c-d4a457b149b6" name="Changes" comment="analysis update">
+    <list default="true" id="0118c334-950a-4c87-8e0c-d4a457b149b6" name="Changes" comment="redactor update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/engine.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db/chess.db" beforeDir="false" afterPath="$PROJECT_DIR$/db/chess.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/menu.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/menu.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/engine_game.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/engine_game.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/game.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/game.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/analysis_position.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/analysis_position.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/engine_game.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/engine_game.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/game.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/game.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/AUTHORS" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/CITATION.cff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/CONTRIBUTING.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/Copying.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/Top CPU Contributors.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/Makefile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/benchmark.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/benchmark.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/bitboard.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/bitboard.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/evaluate.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/evaluate.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/incbin/UNLICENCE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/incbin/incbin.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/main.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/misc.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/misc.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/movegen.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/movegen.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/movepick.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/movepick.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/evaluate_nnue.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/evaluate_nnue.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/features/half_ka_v2_hm.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/features/half_ka_v2_hm.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/layers/affine_transform.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/layers/affine_transform_sparse_input.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/layers/clipped_relu.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/layers/simd.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/layers/sqr_clipped_relu.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/nnue_accumulator.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/nnue_architecture.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/nnue_common.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/nnue/nnue_feature_transformer.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/perft.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/position.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/position.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/search.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/search.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/syzygy/tbprobe.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/syzygy/tbprobe.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/thread.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/thread.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/thread_win32_osx.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/timeman.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/timeman.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/tt.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/tt.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/tune.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/tune.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/types.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/uci.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/uci.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/ucioption.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/src/ucioption.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/stockfish-windows-x86-64-avx2.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Advanced-topics.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Compiling-from-source.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Developers.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Download-and-usage.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Governance-and-responsibilities.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Home.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Regression-Tests.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Stockfish-FAQ.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Terminology.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/UCI-&amp;-Commands.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/Useful-data.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockfish/wiki/_Footer.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -435,7 +497,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718553177399</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="redactor update">
+      <option name="closed" value="true" />
+      <created>1718714016520</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1718714016520</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -466,6 +536,7 @@
     <MESSAGE value="search update" />
     <MESSAGE value="decor update" />
     <MESSAGE value="analysis update" />
-    <option name="LAST_COMMIT_MESSAGE" value="analysis update" />
+    <MESSAGE value="redactor update" />
+    <option name="LAST_COMMIT_MESSAGE" value="redactor update" />
   </component>
 </project>

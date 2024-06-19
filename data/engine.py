@@ -2,10 +2,14 @@ from stockfish import Stockfish
 from chess import Move
 from data import db_session
 from data.analyzes import Analysis
+import platform
 
 
 def engine_move(fen, level):
-    engine = Stockfish('stockfish/stockfish-windows-x86-64-avx2.exe')
+    if platform.system() == 'Windows':
+        engine = Stockfish('stockfish_win/stockfish-windows-x86-64-avx2.exe')
+    else:
+        engine = Stockfish('stockfish_lin/stockfish-windows-x86-64-avx2.exe')
     engine.set_fen_position(fen)
     engine.set_skill_level(level * 2)
     engine.set_depth(15)
@@ -20,7 +24,10 @@ def engine_analysis(fen, depth):
         score = analysis.score
         depth = analysis.depth
     else:
-        engine = Stockfish('stockfish/stockfish-windows-x86-64-avx2.exe')
+        if platform.system() == 'Windows':
+            engine = Stockfish('stockfish_win/stockfish-windows-x86-64-avx2.exe')
+        else:
+            engine = Stockfish('stockfish_lin/stockfish-windows-x86-64-avx2.exe')
         engine.set_fen_position(fen)
         engine.set_depth(depth)
         info = engine.get_evaluation()

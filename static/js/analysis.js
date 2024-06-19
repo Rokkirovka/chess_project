@@ -6,7 +6,7 @@ $(document).ready(function(){
     $('.plus').hide();
     board = Chessboard('chessboard', config);
     setColor(board_color);
-    $.ajax({type: 'get', contentType: 'application/json', data: {fen: game.fen(), depth: 15},
+    $.ajax({type: 'get', contentType: 'application/json', data: {new_fen: game.fen(), depth: 15},
     success: function(data){
         $('.rate').text(data.score)
         $('.depth').text(data.depth)
@@ -27,7 +27,7 @@ function onDrop(source, target){
         depth = 15;
         $('.rate').text('...')
         $('.depth').text(depth)
-        $.ajax({type: 'get', contentType: 'application/json', data: {fen: game.fen(), depth: 15},
+        $.ajax({type: 'get', contentType: 'application/json', data: {new_fen: game.fen(), depth: 15},
         success: function(data){
             $('.rate').text(data.score)
             $('.depth').text(data.depth)
